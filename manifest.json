@@ -1,0 +1,34 @@
+{
+  "manifest_version": 2,
+  "name": "E621Helper",
+  "description": "Даёт возможность сохранять в избраное наборы тегов",
+  "version": "1.0.0",
+  
+  "permissions": [
+    "activeTab",
+    "storage"
+  ],
+
+  "homepage_url": "https://github.com/viverna1",
+  "icons": {
+    "64": "icons/logo.png"
+  },
+  "applications": {
+    "gecko": {
+      "id": "e621helper@viverna.dev"
+    }
+  },
+
+  "browser_action": {
+    "default_icon": "icons/logo.png",
+    "default_title": "e621 Helper",
+    "default_popup": "index.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["*://e621.net/*", "*://e926.net/*"],
+      "js": ["static/script.js"]
+    }
+  ]
+}

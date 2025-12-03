@@ -1,0 +1,220 @@
+:root {
+    --backgroundСolor: #222222;
+    --whiteColor: #e2e2e2;
+}
+
+/* Общие стили */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Montserrat', sans-serif;
+    background-color: var(--backgroundСolor);
+    color: var(--whiteColor);
+    
+    line-height: 1.6;
+    padding: 0;
+    margin: 0;
+    height: auto;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Шапка */
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 7px 10px;
+    background: rgba(255, 255, 255, 0.1);
+    height: 30px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.settings-icon, .add-tag-btn {
+    background: none;
+    border: none;
+    color: var(--whiteColor);
+    cursor: pointer;
+    font-size: 14px;
+    padding: 5px;
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    transition: all 0.2s ease;
+}
+.settings-icon:hover, .add-tag-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+#title {
+    font-size: 17px;
+    font-weight: 500;
+    margin-right: 10px;
+    user-select: none;
+}
+
+
+/* Основная часть */
+main {
+    min-width: 275px;
+    min-height: 100px;
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.input-section, .output-section {
+    position: relative;
+    display: flex;
+    flex: 0 1 auto;
+}
+
+/* Теги */
+.tag-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.1s ease;
+}
+.tag-item:hover {
+    background-color: rgba(255, 255, 255, 0.02);
+}
+
+.tag-name {
+    font-size: 14px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    flex-shrink: 1;
+    min-width: 0;
+}
+
+.tag-actions {
+    flex-shrink: 0;
+    flex-grow: 0;
+    
+    width: auto;
+    display: flex;
+    align-items: center;
+}
+
+.tag-actions button {
+    background: none;
+    border: none;
+    color: var(--whiteColor);
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 4px;
+    padding: 5px;
+    width: 30px; /* или min-width */
+    aspect-ratio: 1 / 1; /* соотношение сторон 1:1 */
+    border-radius: 50%;
+}
+.tag-actions button:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+
+
+/* ====================== стили для настроек ====================== */
+#settings {
+    display: none;
+    font-size: 13px;
+}
+
+
+.switch {
+    display: block;
+    width: 100%;
+    padding: 8px 12px;
+    cursor: pointer;
+    position: relative;
+    transition: background-color 0.3s ease;
+    user-select: none;
+    box-sizing: border-box;
+}
+.switch:hover {
+    background-color: #2c2c2e;
+}
+.switch input[type="checkbox"] {
+    position: absolute;
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+  
+/* Стили для слайдера */
+.slider {
+    position: absolute;
+    right: 12px;
+    top: 50%;   
+    transform: translateY(-50%);
+    width: 40px;
+    height: 17px;
+    background-color: #747474;
+    border-radius: 20px; 
+    transition: 0.2s;
+    cursor: pointer;
+}
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+        
+    left: 2.5px;
+    bottom: 12%;
+
+    background-color: white;
+    border-radius: 50%;
+    transition: 0.2s;
+}
+  
+/* Стили когда чекбокс отмечен */
+input:checked + .slider {
+    background-color: #68afe9;
+}  
+input:checked + .slider:before {
+    height: 13px;
+    transform: translateX(23px);
+}
+
+
+/* разделитель между разделами */
+.settings-section-separator {
+    display: flex;
+    align-items: center;
+    width: auto;
+    margin: 10px 0 0 10px;
+    user-select: none;
+}
+.line {
+    flex: 1;
+    height: 1px;
+    background-color: rgba(255, 255, 255, 0.293);
+    margin: 0 10px;
+}
+.text {
+    white-space: nowrap;
+    font-size: 14px;
+    color: #b6b6b6;
+    /* Выравниваем текст ближе к левому краю */
+    margin-right: auto;
+}
+.settings-section-separator .line:first-child {
+    flex: 0 0 20px; /* Короткая линия слева */
+    margin-left: 0;
+}
+.settings-section-separator .line:last-child {
+    flex: 1; /* Длинная линия справа */
+}

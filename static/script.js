@@ -1,26 +1,26 @@
-const title = document.getElementById('title');
 
-const tagsSection = document.getElementById('tags');
-const settingsSection = document.getElementById('settings');
 
-const settingsIcon = document.querySelector('.settings-icon');
+ 
 
-document.addEventListener('DOMContentLoaded', Main);   
+
 
 // ============= Работа с тегами =============
-function createTagItem(tagName) {
+const tagsSection = document.getElementById('tags');
+
+// Создение элемента тега
+function CreateTagItem(tagName) {
     const article = document.createElement('article');
     article.className = 'tag-item';
     article.dataset.tag = tagName; // добавляем атрибут с именем тега
     
     article.innerHTML = `
-        <h2 class="tag-name">${tagName}</h2>
+        <textarea class="tag-name">${tagName}</textarea>
         <div class="tag-actions">
+            <a href="https://e621.net/posts?tags=${tagName}" target="_blank" class="link-btn" title="follow the link">
+                <i class="fas fa-external-link-alt"></i>
+            </a>
             <button class="copy-btn" title="Copy Tag">
                 <i class="fas fa-copy"></i>
-            </button>
-            <button class="edit-btn" title="Edit Tag">
-                <i class="fas fa-edit"></i>
             </button>
             <button class="delete-btn" title="Delete Tag">
                 <i class="fas fa-trash-alt"></i>
@@ -29,35 +29,51 @@ function createTagItem(tagName) {
     `;
     
     // Находим кнопки внутри этого конкретного article
+    const link = article.querySelector('.tag-name');
     const copyBtn = article.querySelector('.copy-btn');
-    const editBtn = article.querySelector('.edit-btn');
     const deleteBtn = article.querySelector('.delete-btn');
     
-    // Обработчик копирования
-    copyBtn.addEventListener('click', async () => {
-        await copyTag(tagName);
+
+    // Обработчик редактирования
+    link.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            this.blur();
+        }
     });
     
-    // Обработчик редактирования
-    editBtn.addEventListener('click', () => {
-        editTag(article, tagName);
+    // Удаляем уже существующие переносы строк
+    link.addEventListener('input', function() {
+        this.value = this.value.replace(/\n/g, ' ');
+    });
+
+
+    // Обработчик копирования
+    copyBtn.addEventListener('click', async () => {
+        await CopyTag(tagName, article);
     });
     
     // Обработчик удаления
     deleteBtn.addEventListener('click', () => {
-        deleteTag(article);
+        DeleteTag(article);
     });
     
-    tagsSection.appendChild(article);
+    tagsSection.prepend(article);
+    return link;
 }
 
-// Функция копирования тега
-async function copyTag(tagName) {
+// Копирование тега
+async function CopyTag(tagName, article) {
     await navigator.clipboard.writeText(tagName);
+    const icon = article.querySelector('.copy-btn').querySelector('i');
+    icon.className = 'fas fa-check';
+    setTimeout(() => {
+        icon.className = 'fas fa-copy';
+    }, 1000);
 }
 
-// Функция редактирования тега
-function editTag(article, currentName) {
+// Редактирование тега
+function EditTag(article, currentName) {
     const newName = prompt('Введите новое имя тега:', currentName);
     
     if (newName && newName.trim() && newName !== currentName) {
@@ -68,11 +84,28 @@ function editTag(article, currentName) {
     }
 }
 
-// Функция удаления тега
-function deleteTag(article) {
+// Удаление тега
+function DeleteTag(article) {
     article.remove();
 }
 
+
+
+// ============= Основное =============
+const title = document.getElementById('title');
+const addButton = document.querySelector('.add-tag-btn');
+
+function AddTag(){
+    CreateTagItem("").select();
+}
+
+addButton.addEventListener('click', AddTag);
+
+
+
+// ============= Настройки =============
+const settingsSection = document.getElementById('settings');
+const settingsIcon = document.querySelector('.settings-icon');
 
 function InitSettings(debug = false) {
     let isSettingsOpen = false;
@@ -89,9 +122,13 @@ function InitSettings(debug = false) {
     }
 }
 
+
+// ============= Запуск =============
+document.addEventListener('DOMContentLoaded', Main);
+
 function Main() {
-    createTagItem("12");
-    createTagItem("45");
+    CreateTagItem("12");
+    CreateTagItem("45");
 
     InitSettings();
 }

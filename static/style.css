@@ -82,7 +82,7 @@ main {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 8px 12px;
+    padding: 6px 12px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.1s ease;
 }
@@ -91,12 +91,35 @@ main {
 }
 
 .tag-name {
-    font-size: 14px;
+    /* Typography */
+    font-family: Montserrat, sans-serif;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--whiteColor);
+    height: 30px;
+    line-height: 30px;
+    width: 100%;
+    
+    /* Text handling */
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-    flex-shrink: 1;
+    text-wrap: nowrap;
+    
+    /* Layout & Box model */
     min-width: 0;
+    flex-shrink: 1;
+    
+    /* Visual styling */
+    background: none;
+    border: none;
+    cursor: default;
+    resize: none;
+}
+
+.tag-name:focus {
+    outline: none;
+    cursor: text;
 }
 
 .tag-actions {
@@ -108,7 +131,7 @@ main {
     align-items: center;
 }
 
-.tag-actions button {
+.tag-actions > * {
     background: none;
     border: none;
     color: var(--whiteColor);
@@ -120,7 +143,7 @@ main {
     aspect-ratio: 1 / 1; /* соотношение сторон 1:1 */
     border-radius: 50%;
 }
-.tag-actions button:hover {
+.tag-actions > *:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 

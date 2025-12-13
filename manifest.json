@@ -1,9 +1,15 @@
 {
   "manifest_version": 2,
-  "name": "E621Helper",
-  "description": "Даёт возможность сохранять в избраное наборы тегов",
+  "name": "E621 Enhancer",
+  "description": "Даёт возможность сохранять в избранное наборы тегов",
   "version": "1.0.0",
   
+  "data_collection_permissions": {
+    "description": "Расширение использует локальное хранилище для сохранения пользовательских настроек и тегов. Данные хранятся только на устройстве пользователя и не передаются третьим лицам.",
+    "required_data": ["storage"],
+    "optional_data": []
+  },
+
   "permissions": [
     "activeTab",
     "storage"
@@ -16,7 +22,8 @@
   
   "applications": {
     "gecko": {
-      "id": "e621helper@viverna.dev"
+      "id": "E621Enhancer@viverna.dev",
+      "strict_min_version": "91.0"
     }
   },
 
@@ -28,7 +35,8 @@
 
   "content_scripts": [
     {
-      "matches": ["*://e621.net/*", "*://e926.net/*"]
+      "matches": ["*://e621.net/*", "*://e926.net/*"],
+      "js": []
     }
   ]
 }

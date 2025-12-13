@@ -46,6 +46,12 @@ function setupTagEventHandlers(tagItem) {
     const tagInput = tagItem.querySelector('.tag-name');
     const copyBtn = tagItem.querySelector('.copy-btn');
     const deleteBtn = tagItem.querySelector('.delete-btn');
+    const linkBtn = tagItem.querySelector('.link-btn');
+
+    // Переход по ссылке
+    linkBtn.addEventListener('click', () => {
+        setTimeout(window.close, 50);
+    });
 
     // Редактирование тега
     tagInput.addEventListener('focus', () => {

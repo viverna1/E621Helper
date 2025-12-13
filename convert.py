@@ -1,7 +1,7 @@
 import os
 import zipfile
 
-file_path = "e621helper.xpi"
+file_path = "E621Enhancer.xpi"
 
 # Удаляем старый XPI, если он существует
 if os.path.exists(file_path):
@@ -11,7 +11,7 @@ else:
     print("Файл не найден, создаём новый")
 
 # Чёрный список (файлы и папки)
-blacklist = [".python scripts", ".git", "e621helper.xpi", ".test", ".gitignore", "convert.py"]
+blacklist = [".python scripts", ".git", file_path, ".test", ".gitignore", "convert.py"]
 
 with zipfile.ZipFile(file_path, "w") as archive:
     for root, dirs, files in os.walk("."):

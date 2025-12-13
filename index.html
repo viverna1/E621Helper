@@ -27,55 +27,63 @@
             </button>
 
             <!-- кнопка настроек -->
-            <button class="settings-icon">
+            <button class="settings-btn">
                 <i class="fas fa-cog"></i>
             </button>
         </div>
     </header>
 
     <!-- Основная часть переводчика -->
-    <main id="tags">
-        <article class="tag-item" style="display: none">
-            <textarea class="tag-name">example_tag_1</textarea>
-            <div class="tag-actions">
-                <a href="https://e621.net/posts?tags=example_tag_1" target="_blank" class="link-btn" title="Follow the link"><i class="fas fa-external-link-alt"></i></a>
-                <button class="copy-btn" title="Copy tag"><i class="fas fa-copy"></i></button>
-                <button class="delete-btn" title="Delete tag"><i class="fas fa-trash-alt"></i></button>
-            </div>
-        </article>
+    <main>
+        <ul id="tags-list">
+            <li class="tag-item" style="display: none">
+                <input type="text" class="tag-name" value="example_tag_1">
+                <div class="tag-actions">
+                    <button class="submit-btn" title="Submit changes" style="display: none;"><i class="fas fa-check"></i></button>
+                    <a href="https://e621.net/posts?tags=example_tag_1" target="_blank" class="link-btn" title="Follow the link"><i class="fas fa-external-link-alt"></i></a>
+                    <button class="copy-btn" title="Copy tag"><i class="fas fa-copy"></i></button>
+                    <button class="delete-btn" title="Delete tag"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </li>
+        </ul>
     </main>
 
     <!-- Настройки -->
     <main id="settings" style="display: none;">
         <nav style="display: none;">
             <ul>
-                <li>Основные</li>
-                <li>Внешний вид</li>
-                <li>Горячие клавиши</li>
+                <li>General</li>
+                <li>Appearance</li>
+                <li>Hotkeys</li>
             </ul>
-        </nav>     
+        </nav>
         
-        <label for="toggle-youtube-translator" class="switch" title="Включить или отключить переводчик в проигрывателе ютуба">Переводчик в ютубе
-            <input type="checkbox" id="toggle-youtube-translator">
-            <span class="slider"></span>
-        </label>
+        <div id="generalSettings">
+            <label for="a1" class="switch" title="123">togle nothing
+                <input type="checkbox" id="a1">
+                <span class="slider"></span>
+            </label>
 
-        <label for="a1" class="switch" title="123">опция 1
-            <input type="checkbox" id="a1">
-            <span class="slider"></span>
-        </label>
-
-        <!-- разделитель между разделами -->
-        <div class="settings-section-separator">
-            <span class="line"></span>
-            <span class="text">Текст</span>
-            <span class="line"></span>
+            <!-- разделитель между разделами -->
+            <div class="settings-section-separator">
+                <span class="line"></span>
+                <span class="text">title</span>
+                <span class="line"></span>
+            </div>
+            
+            <label for="a2" class="switch" title="123">option 2
+                <input type="checkbox" id="a2">
+                <span class="slider"></span>
+            </label>
         </div>
-        
-        <label for="a2" class="switch" title="123">опция 2
-            <input type="checkbox" id="a2">
-            <span class="slider"></span>
-        </label>
+
+        <div id="appearanceSettings" style="display: none;">
+            <p>Appearance settings coming soon...</p>
+        </div>
+
+        <div id="hotkeysSettings" style="display: none;">
+            <p>Hotkeys settings coming soon...</p>
+        </div>
     </main>
     
     <!-- Скрипт приложения -->

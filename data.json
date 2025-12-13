@@ -1,8 +1,15 @@
 {
-    "background_color": "#222222",
+    "internal": {
+        "background_color": "#222222",
+        "second_color": "#404040"
+    },
+    "options": {
+        "a1": false,
+        "a2": true
+    },
     "tags": [
-        "example_tag_1",
-        "example_tag_2",
-        "example_tag_3"
+        "order:score",
+        "score:>200",
+        "rain_world"
     ]
 }

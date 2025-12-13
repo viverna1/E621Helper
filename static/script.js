@@ -1,22 +1,29 @@
-
-
- 
-
-
+// ============= Глобальные переменные =============
+let appData = {
+    internal: {},
+    options: {},
+    tags: []
+};
+const tagsContainer = document.getElementById('tags-list');
+const title = document.getElementById('title');
+const addButton = document.querySelector('.add-tag-btn');
+const settingsSection = document.getElementById('settings');
+const settingsIcon = document.querySelector('.settings-btn');
+const main = document.querySelector('main');
 
 // ============= Работа с тегами =============
-const tagsSection = document.getElementById('tags');
+function createTagElement(tagName) {
+    const tagItem = document.createElement('li');
+    tagItem.className = 'tag-item';
+    tagItem.dataset.tag = tagName;
 
-// Создение элемента тега
-function CreateTagItem(tagName) {
-    const article = document.createElement('article');
-    article.className = 'tag-item';
-    article.dataset.tag = tagName; // добавляем атрибут с именем тега
-    
-    article.innerHTML = `
-        <textarea class="tag-name">${tagName}</textarea>
+    tagItem.innerHTML = `
+        <input type="text" class="tag-name" value="${tagName}">
         <div class="tag-actions">
-            <a href="https://e621.net/posts?tags=${tagName}" target="_blank" class="link-btn" title="follow the link">
+            <button class="submit-btn" title="Submit changes" style="display: none;">
+                <i class="fas fa-check"></i>
+            </button>
+            <a href="https://e621.net/posts?tags=${tagName}" target="_blank" class="link-btn" title="Follow the link">
                 <i class="fas fa-external-link-alt"></i>
             </a>
             <button class="copy-btn" title="Copy Tag">
@@ -27,108 +34,231 @@ function CreateTagItem(tagName) {
             </button>
         </div>
     `;
-    
-    // Находим кнопки внутри этого конкретного article
-    const link = article.querySelector('.tag-name');
-    const copyBtn = article.querySelector('.copy-btn');
-    const deleteBtn = article.querySelector('.delete-btn');
-    
 
-    // Обработчик редактирования
-    link.addEventListener('keydown', function(e) {
-        if (e.key === 'Enter') {
-            e.preventDefault();
-            this.blur();
-        }
-    });
+    setupTagEventHandlers(tagItem);
     
-    // Удаляем уже существующие переносы строк
-    link.addEventListener('input', function() {
-        this.value = this.value.replace(/\n/g, ' ');
-    });
-
-
-    // Обработчик копирования
-    copyBtn.addEventListener('click', async () => {
-        await CopyTag(tagName, article);
-    });
-    
-    // Обработчик удаления
-    deleteBtn.addEventListener('click', () => {
-        DeleteTag(article);
-    });
-    
-    tagsSection.prepend(article);
-    return link;
+    tagsContainer.prepend(tagItem);
+    return tagItem.querySelector('.tag-name');
 }
 
-// Копирование тега
-async function CopyTag(tagName, article) {
+function setupTagEventHandlers(tagItem) {
+    const submitBtn = tagItem.querySelector('.submit-btn');
+    const tagInput = tagItem.querySelector('.tag-name');
+    const copyBtn = tagItem.querySelector('.copy-btn');
+    const deleteBtn = tagItem.querySelector('.delete-btn');
+
+    // Редактирование тега
+    tagInput.addEventListener('focus', () => {
+        submitBtn.style.display = 'inline-block';
+    });
+
+    tagInput.addEventListener('blur', () => {
+        updateTagInData(tagItem);
+        submitBtn.style.display = 'none';
+    });
+
+    tagInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            tagInput.blur();
+        }
+        // Убираем переносы строк
+        if (e.key === 'Enter' || e.key === 'Escape') {
+            tagInput.value = tagInput.value.replace(/\n/g, ' ');
+        }
+    });
+
+    tagInput.addEventListener('input', () => {
+        tagInput.value = tagInput.value.replace(/\n/g, ' ');
+    });
+
+    // Кнопка подтверждения
+    submitBtn.addEventListener('click', () => {
+        tagInput.blur();
+    });
+
+    // Копирование
+    copyBtn.addEventListener('click', async () => {
+        await copyTagToClipboard(tagItem);
+    });
+
+    // Удаление
+    deleteBtn.addEventListener('click', () => {
+        removeTagFromData(tagItem);
+    });
+}
+
+function addTagToData(tagName, onTop = false) {
+    if (!tagName || tagName.trim() === '') return null;
+    
+    // Проверяем, нет ли уже такого тега
+    if (appData.tags.includes(tagName.trim())) {
+        return null;
+    }
+    
+    appData.tags.push(tagName.trim());
+    saveAllData();
+    return createTagElement(tagName.trim(), onTop);
+}
+
+function updateTagInData(tagItem) {
+    const tagInput = tagItem.querySelector('.tag-name');
+    const oldName = tagItem.dataset.tag;
+    const newName = tagInput.value.trim();
+    
+    // Если поле пустое - удаляем тег
+    if (newName === '') {
+        removeTagFromData(tagItem);
+        return;
+    }
+    
+    // Если имя не изменилось
+    if (oldName === newName) return;
+    
+    // Обновляем в массиве
+    const index = appData.tags.indexOf(oldName);
+    if (index !== -1) {
+        appData.tags[index] = newName;
+    } else {
+        appData.tags.push(newName);
+    }
+    
+    // Обновляем DOM
+    tagItem.dataset.tag = newName;
+    tagItem.querySelector('.link-btn').href = `https://e621.net/posts?tags=${newName}`;
+    
+    saveAllData();
+}
+
+function removeTagFromData(tagItem) {
+    const tagName = tagItem.dataset.tag;
+    const index = appData.tags.indexOf(tagName);
+    
+    if (index !== -1) {
+        appData.tags.splice(index, 1);
+        saveAllData();
+    }
+    
+    tagItem.remove();
+}
+
+async function copyTagToClipboard(tagItem) {
+    const tagName = tagItem.querySelector('.tag-name').value;
     await navigator.clipboard.writeText(tagName);
-    const icon = article.querySelector('.copy-btn').querySelector('i');
+    
+    const icon = tagItem.querySelector('.copy-btn i');
     icon.className = 'fas fa-check';
+    
     setTimeout(() => {
         icon.className = 'fas fa-copy';
     }, 1000);
 }
 
-// Редактирование тега
-function EditTag(article, currentName) {
-    const newName = prompt('Введите новое имя тега:', currentName);
-    
-    if (newName && newName.trim() && newName !== currentName) {
-        // Обновляем текст
-        article.querySelector('.tag-name').textContent = newName;
-        // Обновляем атрибут
-        article.dataset.tag = newName;
+// ============= Управление данными =============
+async function loadJsonData() {
+    try {
+        const response = await fetch('data.json');
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        return { internal: {}, options: {}, tags: [] };
     }
 }
 
-// Удаление тега
-function DeleteTag(article) {
-    article.remove();
+function loadAllData() {
+    const saved = localStorage.getItem('appData');
+    if (saved) {
+        appData = JSON.parse(saved);
+        return true;
+    }
+    return false;
 }
 
-
-
-// ============= Основное =============
-const title = document.getElementById('title');
-const addButton = document.querySelector('.add-tag-btn');
-
-function AddTag(){
-    CreateTagItem("").select();
+function saveAllData() {
+    localStorage.setItem('appData', JSON.stringify(appData));
 }
 
-addButton.addEventListener('click', AddTag);
+// ============= Интерфейс =============
+function addNewTag() {
+    const input = createTagElement('');
+    input.select();
+}
 
-
-
-// ============= Настройки =============
-const settingsSection = document.getElementById('settings');
-const settingsIcon = document.querySelector('.settings-icon');
-
-function InitSettings(debug = false) {
+function initSettings(debug = false) {
     let isSettingsOpen = false;
-    settingsIcon.addEventListener('click', function() {
+    
+    settingsIcon.addEventListener('click', function () {
         isSettingsOpen = !isSettingsOpen;
+        
         settingsIcon.style.transform = isSettingsOpen ? 'rotate(45deg)' : 'rotate(0deg)';
-        tagsSection.style.display = isSettingsOpen ? 'none' : 'flex';
+        addButton.style.display = isSettingsOpen ? 'none' : 'inline-block';
+        main.style.display = isSettingsOpen ? 'none' : 'block';
         settingsSection.style.display = isSettingsOpen ? 'flex' : 'none';
-
         title.textContent = isSettingsOpen ? 'Settings' : 'Saved tags';
-    }); 
+        if (isSettingsOpen) setSettingsUI();
+    });
+    
     if (debug) {
         settingsIcon.click();
     }
+
+    initSettingsUI();
 }
 
-
-// ============= Запуск =============
-document.addEventListener('DOMContentLoaded', Main);
-
-function Main() {
-    CreateTagItem("12");
-    CreateTagItem("45");
-
-    InitSettings();
+function setSettingsUI() {
+    const options = appData.options;
+    Object.keys(options).forEach(option => {
+        document.getElementById(option).checked = options[option];
+    });
 }
+
+function initSettingsUI() {
+    const options = appData.options;
+    
+    Object.keys(options).forEach(key => {
+        const element = document.getElementById(key);
+        element.addEventListener('change', function() {
+            appData.options[key] = this.checked;
+            saveAllData();
+        });
+    });
+}
+
+function applyTheme(bgColor, secondColor) {
+    document.documentElement.style.setProperty('--backgroundСolor', bgColor);
+    document.documentElement.style.setProperty('--secondColor', secondColor);
+}
+
+// ============= Запуск приложения =============
+async function initializeApp() {
+    // Пытаемся загрузить из localStorage
+    const hasSavedData = loadAllData();
+    
+    // Если нет сохраненных данных, загружаем из JSON
+    if (!hasSavedData) {
+        const jsonData = await loadJsonData();
+        appData = jsonData;
+        saveAllData(); // Сохраняем для будущего использования
+    }
+    
+    // Применяем тему
+    if (appData.internal) {
+        applyTheme(appData.internal.background_color, appData.internal.second_color);
+    }
+    
+    // Загружаем теги
+    if (appData.tags && Array.isArray(appData.tags)) {
+        appData.tags.forEach(tag => {
+            if (tag && tag.trim() !== '') {
+                createTagElement(tag.trim());
+            }
+        });
+    }
+    
+    // Инициализируем интерфейс
+    addButton.addEventListener('click', addNewTag);
+    initSettings();
+}
+
+initializeApp();

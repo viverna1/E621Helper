@@ -13,6 +13,7 @@
   "icons": {
     "64": "icons/logo.png"
   },
+  
   "applications": {
     "gecko": {
       "id": "e621helper@viverna.dev"
@@ -27,8 +28,7 @@
 
   "content_scripts": [
     {
-      "matches": ["*://e621.net/*", "*://e926.net/*"],
-      "js": ["static/script.js"]
+      "matches": ["*://e621.net/*", "*://e926.net/*"]
     }
   ]
 }

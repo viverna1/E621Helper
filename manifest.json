@@ -1,42 +1,35 @@
 {
   "manifest_version": 2,
-  "name": "E621 Enhancer",
-  "description": "Даёт возможность сохранять в избранное наборы тегов",
+  "name": "e621 Enhancer",
   "version": "1.0.0",
-  
-  "data_collection_permissions": {
-    "description": "Расширение использует локальное хранилище для сохранения пользовательских настроек и тегов. Данные хранятся только на устройстве пользователя и не передаются третьим лицам.",
-    "required_data": ["storage"],
-    "optional_data": []
-  },
-
-  "permissions": [
-    "activeTab",
-    "storage"
-  ],
-
+  "description": "Расширение для улучшения e621/e926: управление тегами, настройки интерфейса и дополнительные инструменты",
   "homepage_url": "https://github.com/viverna1",
-  "icons": {
-    "64": "icons/logo.png"
-  },
   
-  "applications": {
-    "gecko": {
-      "id": "E621Enhancer@viverna.dev",
-      "strict_min_version": "91.0"
-    }
-  },
-
+  "permissions": ["activeTab", "storage"],
+  
+  "icons": { "64": "icons/logo.png" },
+  
   "browser_action": {
     "default_icon": "icons/logo.png",
-    "default_title": "e621 Helper",
+    "default_title": "e621 Enhancer",
     "default_popup": "index.html"
   },
-
+  
   "content_scripts": [
     {
       "matches": ["*://e621.net/*", "*://e926.net/*"],
-      "js": []
+      "js": ["static/utils.js", "static/background.js"]
     }
-  ]
+  ],
+  
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "e621enhancer@viverna.dev",
+      "strict_min_version": "91.0",
+      "data_collection_permissions": {
+        "required": ["none"],
+        "optional": []
+      }
+    }
+  }
 }

@@ -7,9 +7,33 @@
         "a1": false,
         "a2": true
     },
+
     "tags": [
-        "order:score",
-        "score:>200",
-        "rain_world"
-    ]
+        {"id": 1, "name": "order:score", "category": "general", "editedAt": "2024-01-15T14:30:00Z"},
+        {"id": 2, "name": "score:>200", "category": "general", "editedAt": "2024-01-15T14:30:00Z"},
+        {"id": 3, "name": "rain_world", "category": "general", "editedAt": "2024-01-15T14:30:00Z"}
+    ],
+    "folders": [
+        {
+            "id": "1f",
+            "name": "meta",
+            "collapsed": false,
+            "tagsId": [1, 2]
+        },
+        {
+            "id": "2f",
+            "name": "copyright",
+            "collapsed": false,
+            "tagsId": [3]
+        }
+    ],
+    "items": [
+        {"type": "folder", "id": "f1", "order": 0},
+        {"type": "tag", "id": 2, "order": 2},
+        {"type": "tag", "id": 1, "order": 1},
+        {"type": "folder", "id": "f2", "order": 3},
+        {"type": "tag", "id": 3, "order": 4}
+    ],
+
+    "recentTags": []
 }

@@ -40,7 +40,7 @@ header {
     align-items: center;
     gap: 8px;
 }
-.settings-btn, .add-tag-btn {
+.header-btn {
     background: none;
     border: none;
     color: var(--whiteColor);
@@ -52,7 +52,7 @@ header {
     border-radius: 50%;
     transition: all 0.2s ease;
 }
-.settings-btn:hover, .add-tag-btn:hover {
+.header-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 

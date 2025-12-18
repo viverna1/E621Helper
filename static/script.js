@@ -1,20 +1,86 @@
-// ============= Глобальные переменные =============
-let appData = {
-    internal: {},
-    options: {},
-    tags: []
+// Глобальная функция для очистки данных через консоль
+window.clear = async function() {
+    console.log("Очистка данных e621Enhancer...");
+    
+    // Очищаем локальные данные
+    window.e621Utils.appData = {
+        internal: {},
+        options: {},
+        tags: [],
+        folders: [],
+        items: [],
+        recentTags: []
+    };
+    
+    // Очищаем storage браузера
+    try {
+        await browser.storage.local.clear();
+        console.log("✓ Storage очищен");
+    } catch (error) {
+        console.error("Ошибка при очистке storage:", error);
+    }
+    
+    // Загружаем данные по умолчанию
+    try {
+        await window.e621Utils.loadJsonData();
+        window.e621Utils.saveAllData();
+        console.log("✓ Загружены данные по умолчанию");
+    } catch (error) {
+        console.error("Ошибка при загрузке данных по умолчанию:", error);
+    }
+    
+    console.log("✅ Все данные очищены. Обновите страницу e621.net");
+    
+    return "Готово. Обновите страницу.";
 };
+
+// Добавим также функцию для просмотра текущих данных
+window.showData = function() {
+    console.log("Текущие данные e621Enhancer:");
+    console.log("Опции:", window.e621Utils.getOptions());
+    console.log("Теги:", window.e621Utils.getTags());
+    console.log("Все данные:", window.e621Utils.appData);
+};
+
+// И функцию для сброса к настройкам по умолчанию (без очистки тегов)
+window.resetSettings = async function() {
+    console.log("Сброс настроек...");
+    
+    // Сохраняем текущие теги
+    const currentTags = window.e621Utils.appData.tags || [];
+    const currentFolders = window.e621Utils.appData.folders || [];
+    const currentItems = window.e621Utils.appData.items || [];
+    
+    // Загружаем данные по умолчанию
+    await window.e621Utils.loadJsonData();
+    
+    // Восстанавливаем пользовательские данные
+    window.e621Utils.appData.tags = currentTags;
+    window.e621Utils.appData.folders = currentFolders;
+    window.e621Utils.appData.items = currentItems;
+    
+    window.e621Utils.saveAllData();
+    console.log("✅ Настройки сброшены, теги сохранены");
+};
+
+window.test = async function() {
+    console.log(123);
+    
+}
+
+// ============= Глобальные переменные =============
 const tagsContainer = document.getElementById('tags-list');
 const title = document.getElementById('title');
-const addButton = document.querySelector('.add-tag-btn');
+const addButton = document.getElementById('add-tag-btn');
 const settingsSection = document.getElementById('settings');
-const settingsIcon = document.querySelector('.settings-btn');
+const settingsIcon = document.getElementById('settings-btn');
 const main = document.querySelector('main');
 
 // ============= Работа с тегами =============
-function createTagElement(tagName) {
+function createTagElement(tagName, tagId) {
     const tagItem = document.createElement('li');
     tagItem.className = 'tag-item';
+    tagItem.id = "tag-item-" + tagId;
     tagItem.dataset.tag = tagName;
 
     tagItem.innerHTML = `
@@ -23,7 +89,7 @@ function createTagElement(tagName) {
             <button class="submit-btn" title="Submit changes" style="display: none;">
                 <i class="fas fa-check"></i>
             </button>
-            <a href="https://e621.net/posts?tags=${tagName}" target="_blank" class="link-btn" title="Follow the link">
+            <a href="${formatLink(tagName)}" target="_blank" class="link-btn" title="Follow the link">
                 <i class="fas fa-external-link-alt"></i>
             </a>
             <button class="copy-btn" title="Copy Tag">
@@ -35,13 +101,12 @@ function createTagElement(tagName) {
         </div>
     `;
 
-    setupTagEventHandlers(tagItem);
-    
+    setupTagEventHandlers(tagItem, tagId);
     tagsContainer.prepend(tagItem);
     return tagItem.querySelector('.tag-name');
 }
 
-function setupTagEventHandlers(tagItem) {
+function setupTagEventHandlers(tagItem, tagId) {
     const submitBtn = tagItem.querySelector('.submit-btn');
     const tagInput = tagItem.querySelector('.tag-name');
     const copyBtn = tagItem.querySelector('.copy-btn');
@@ -59,7 +124,8 @@ function setupTagEventHandlers(tagItem) {
     });
 
     tagInput.addEventListener('blur', () => {
-        updateTagInData(tagItem);
+        e621Utils.updateTagInData(tagId, tagInput.value);
+        updateTag(tagId, tagInput.value);
         submitBtn.style.display = 'none';
     });
 
@@ -90,62 +156,9 @@ function setupTagEventHandlers(tagItem) {
 
     // Удаление
     deleteBtn.addEventListener('click', () => {
-        removeTagFromData(tagItem);
+        e621Utils.removeTagFromData(tagId);
+        deleteTag(tagItem);
     });
-}
-
-function addTagToData(tagName, onTop = false) {
-    if (!tagName || tagName.trim() === '') return null;
-    
-    // Проверяем, нет ли уже такого тега
-    if (appData.tags.includes(tagName.trim())) {
-        return null;
-    }
-    
-    appData.tags.push(tagName.trim());
-    saveAllData();
-    return createTagElement(tagName.trim(), onTop);
-}
-
-function updateTagInData(tagItem) {
-    const tagInput = tagItem.querySelector('.tag-name');
-    const oldName = tagItem.dataset.tag;
-    const newName = tagInput.value.trim();
-    
-    // Если поле пустое - удаляем тег
-    if (newName === '') {
-        removeTagFromData(tagItem);
-        return;
-    }
-    
-    // Если имя не изменилось
-    if (oldName === newName) return;
-    
-    // Обновляем в массиве
-    const index = appData.tags.indexOf(oldName);
-    if (index !== -1) {
-        appData.tags[index] = newName;
-    } else {
-        appData.tags.push(newName);
-    }
-    
-    // Обновляем DOM
-    tagItem.dataset.tag = newName;
-    tagItem.querySelector('.link-btn').href = `https://e621.net/posts?tags=${newName}`;
-    
-    saveAllData();
-}
-
-function removeTagFromData(tagItem) {
-    const tagName = tagItem.dataset.tag;
-    const index = appData.tags.indexOf(tagName);
-    
-    if (index !== -1) {
-        appData.tags.splice(index, 1);
-        saveAllData();
-    }
-    
-    tagItem.remove();
 }
 
 async function copyTagToClipboard(tagItem) {
@@ -160,34 +173,32 @@ async function copyTagToClipboard(tagItem) {
     }, 1000);
 }
 
-// ============= Управление данными =============
-async function loadJsonData() {
-    try {
-        const response = await fetch('data.json');
-        const data = await response.json();
-        return data;
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        return { internal: {}, options: {}, tags: [] };
-    }
+function deleteTag(tagItem) {
+    tagItem.remove();
 }
 
-function loadAllData() {
-    const saved = localStorage.getItem('appData');
-    if (saved) {
-        appData = JSON.parse(saved);
-        return true;
-    }
-    return false;
+function formatLink(target) {
+    return "https://e621.net/posts?tags=" + target.replace(/\s+/g, '+');
 }
 
-function saveAllData() {
-    localStorage.setItem('appData', JSON.stringify(appData));
+async function updateTag(tagId, newName) {
+    const element = document.getElementById(`tag-item-${tagId}`)
+
+    // пустое имя — удалить
+    if (newName === '') {
+        deleteTag(element);
+        return;
+    }
+
+    // обновляем ссылку
+    const link = element.querySelector('.link-btn');
+    link.href = formatLink(newName);
 }
 
 // ============= Интерфейс =============
-function addNewTag() {
-    const input = createTagElement('');
+async function addNewTag() {
+    await e621Utils.addTagToData('');
+    const input = createTagElement('', e621Utils.getNextTagId() - 1);
     input.select();
 }
 
@@ -213,20 +224,20 @@ function initSettings(debug = false) {
 }
 
 function setSettingsUI() {
-    const options = appData.options;
+    const options = e621Utils.getOptions();
     Object.keys(options).forEach(option => {
         document.getElementById(option).checked = options[option];
     });
 }
 
 function initSettingsUI() {
-    const options = appData.options;
+    const options = e621Utils.getOptions();
     
     Object.keys(options).forEach(key => {
         const element = document.getElementById(key);
         element.addEventListener('change', function() {
-            appData.options[key] = this.checked;
-            saveAllData();
+            options[key] = this.checked;
+            e621Utils.saveAllData();
         });
     });
 }
@@ -238,31 +249,22 @@ function applyTheme(bgColor, secondColor) {
 
 // ============= Запуск приложения =============
 async function initializeApp() {
-    // Пытаемся загрузить из localStorage
-    const hasSavedData = loadAllData();
-    
-    // Если нет сохраненных данных, загружаем из JSON
-    if (!hasSavedData) {
-        const jsonData = await loadJsonData();
-        appData = jsonData;
-        saveAllData(); // Сохраняем для будущего использования
-    }
-    
-    // Применяем тему
-    if (appData.internal) {
-        applyTheme(appData.internal.background_color, appData.internal.second_color);
-    }
-    
-    // Загружаем теги
-    if (appData.tags && Array.isArray(appData.tags)) {
-        appData.tags.forEach(tag => {
-            if (tag && tag.trim() !== '') {
-                createTagElement(tag.trim());
-            }
-        });
-    }
-    
-    // Инициализируем интерфейс
+    // загружаем данные из расширения
+    await e621Utils.initData()
+
+    // применяем тему
+    const internal = e621Utils.getInternal();
+    applyTheme(internal.background_color, internal.second_color);
+
+    // создаём элементы с учётом нового формата
+    const items = e621Utils.getItems().sort((a, b) => a.order - b.order);
+    items.forEach(item => {
+        if (item.type === "tag") {
+            const tag = e621Utils.getTagById(item.id);
+            createTagElement(tag.name.trim(), tag.id);
+        }
+    });
+
     addButton.addEventListener('click', addNewTag);
     initSettings();
 }

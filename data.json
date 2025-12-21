@@ -4,35 +4,39 @@
         "second_color": "#404040"
     },
     "options": {
-        "a1": false,
-        "a2": true
+        "tags_in_e621": true,
+        "hide_original_tags": false
     },
 
     "tags": [
-        {"id": 1, "name": "order:score", "category": "general", "editedAt": "2024-01-15T14:30:00Z"},
-        {"id": 2, "name": "score:>200", "category": "general", "editedAt": "2024-01-15T14:30:00Z"},
-        {"id": 3, "name": "rain_world", "category": "general", "editedAt": "2024-01-15T14:30:00Z"}
+        {"id": 1, "name": "order:score", "category": "meta", "folderId": "f1", "updatedAt": "2025-12-18T01:58:51.835Z"},
+        {"id": 2, "name": "score:>200", "category": "meta", "folderId": "f1", "updatedAt": "2025-12-18T01:58:51.835Z"},
+        {"id": 3, "name": "rain_world", "category": "copyright", "folderId": "f2", "updatedAt": "2025-12-18T010:58:51.835Z"},
+        {"id": 4, "name": "anthro", "category": "general", "folderId": null, "updatedAt": "2025-12-18T010:58:51.835Z"},
+        {"id": 5, "name": "protogen", "category": "Species", "folderId": null, "updatedAt": "2025-12-18T010:58:51.835Z"}
     ],
     "folders": [
         {
-            "id": "1f",
+            "id": "f1",
             "name": "meta",
             "collapsed": false,
             "tagsId": [1, 2]
         },
         {
-            "id": "2f",
+            "id": "f2",
             "name": "copyright",
-            "collapsed": false,
+            "collapsed": true,
             "tagsId": [3]
         }
     ],
     "items": [
-        {"type": "folder", "id": "f1", "order": 0},
-        {"type": "tag", "id": 2, "order": 2},
-        {"type": "tag", "id": 1, "order": 1},
-        {"type": "folder", "id": "f2", "order": 3},
-        {"type": "tag", "id": 3, "order": 4}
+        {"type": "tag", "id": 5, "order": 6},
+        {"type": "tag", "id": 4, "order": 5},
+        {"type": "folder", "id": "f2", "order": 4},
+        {"type": "tag", "id": 3, "order": 3},
+        {"type": "folder", "id": "f1", "order": 2},
+        {"type": "tag", "id": 2, "order": 0},
+        {"type": "tag", "id": 1, "order": 1}
     ],
 
     "recentTags": []

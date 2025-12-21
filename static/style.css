@@ -25,6 +25,10 @@ body {
     width: 350px;
 }
 
+.hide {
+    display: none !important;
+}
+
 /* Шапка */
 header {
     display: flex;
@@ -81,12 +85,14 @@ main {
 
 /* Теги */
 .tag-item {
+    position: relative;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 6px 12px;
+    padding-left: 6px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.1s ease;
+    transition: background-color 0.2s ease;
 }
 .tag-item:hover {
     background-color: rgba(255, 255, 255, 0.02);
@@ -114,7 +120,7 @@ main {
     cursor: text;
 }
 
-.tag-actions {
+.tag-actions, .confirm-actions {
     flex-shrink: 0;
     flex-grow: 0;
     
@@ -123,7 +129,7 @@ main {
     align-items: center;
 }
 
-.tag-actions > * {
+.btn {
     background: none;
     border: none;
     color: var(--whiteColor);
@@ -135,48 +141,106 @@ main {
     aspect-ratio: 1 / 1; /* соотношение сторон 1:1 */
     border-radius: 50%;
 }
-.tag-actions > *:hover {
+.btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
+}
+
+.folder-item {
+    display: flex;
+    position: relative;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0px 12px 0px 6px;
+    background-color: rgba(255, 255, 255, 0.1);
+    transition: background-color 0.2s ease;
+}
+.collapse-btn {
+    margin-right: 5px;
+}
+.collapse-btn:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Drag & Drop стили */
+.dragging {
+    z-index: 100;
+}
+
+.drag-point {
+    transform: translateX(-150%);
+    margin-right: 5px;
+    transition: transform 0.1s ease-in-out;
+    cursor: grab;
+}
+
+.folder-item:hover .drag-point, .tag-item:hover .drag-point {
+    transform: translateX(0);
+}
+
+.drag-point:active {
+    cursor: grabbing;
+    transform: translateX(0);
+}
+
+.drag-over {
+    background-color: rgba(100, 150, 255, 0.3) !important;
+}
+
+.drop-indicator {
+    height: 2px;
+    background-color: #9bc8ec;
+    position: absolute;
+    left: 0;
+    right: 0;
+    z-index: 100;
+}
+
+.no-select {
+    user-select: none;
 }
 
 
 
 /* ====================== стили для настроек ====================== */
-#settings {
+#settings-main {
     display: none;
     font-size: 13px;
 }
 
 
-.switch {
-    display: block;
+.setting-item {
+    display: flex;
     width: 100%;
     padding: 8px 12px;
-    cursor: pointer;
     position: relative;
     transition: background-color 0.3s ease;
     user-select: none;
-    box-sizing: border-box;
+    align-items: center;
 }
-.switch:hover {
+.setting-item:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
+.setting-item > * {
+    position: absolute;
+    right: 12px;
+}
+
+
+/* Стили для чекбокса */
 .switch input[type="checkbox"] {
     position: absolute;
     opacity: 0;
     width: 0;
     height: 0;
 }
-  
-/* Стили для слайдера */
+
 .slider {
-    position: absolute;
-    right: 12px;
-    top: 50%;   
+    top: 50%;
     transform: translateY(-50%);
     width: 40px;
     height: 17px;
     background-color: #747474;
+    background-color: rgba(255, 255, 255, 0.3);
     border-radius: 20px; 
     transition: 0.2s;
     cursor: pointer;
@@ -194,14 +258,31 @@ main {
     border-radius: 50%;
     transition: 0.2s;
 }
-  
-/* Стили когда чекбокс отмечен */
+
 input:checked + .slider {
     background-color: #68afe9;
 }  
 input:checked + .slider:before {
     height: 13px;
     transform: translateX(23px);
+}
+
+
+/* кнопка */
+.setting-btn {
+    height: 25px;
+    width: 75px;
+    border-radius: 7px;
+    background-color: #747474;
+    background-color: rgba(255, 255, 255, 0.1);
+    color: var(--whiteColor);
+    border: rgba(255, 255, 255, 0.1) 1px solid;
+}
+.setting-btn:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+.setting-btn:active {
+    background-color: rgba(255, 255, 255, 0.15);
 }
 
 
@@ -233,3 +314,13 @@ input:checked + .slider:before {
 .settings-section-separator .line:last-child {
     flex: 1; /* Длинная линия справа */
 }
+
+
+
+
+
+
+
+
+
+

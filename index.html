@@ -39,60 +39,71 @@
     </header>
 
     <!-- Мейн -->
-    <main>
+    <main id="tags-main">
         <ul id="tags-list">
             <li class="tag-item" style="display: none">
+                <svg class="drag-point" width="25" height="25" viewBox="40 0 10 80">
+                    <circle cx="30" cy="20" r="6" fill="#ccc"/>
+                    <circle cx="30" cy="40" r="6" fill="#ccc"/>
+                    <circle cx="30" cy="60" r="6" fill="#ccc"/>
+                    <circle cx="50" cy="20" r="6" fill="#ccc"/>
+                    <circle cx="50" cy="40" r="6" fill="#ccc"/>
+                    <circle cx="50" cy="60" r="6" fill="#ccc"/>
+                </svg>
                 <input type="text" class="tag-name" value="example_tag_1">
                 <div class="tag-actions">
-                    <button class="submit-btn" title="Submit changes" style="display: none;"><i class="fas fa-check"></i></button>
-                    <a href="https://e621.net/posts?tags=example_tag_1" target="_blank" class="link-btn" title="Follow the link"><i class="fas fa-external-link-alt"></i></a>
-                    <button class="copy-btn" title="Copy tag"><i class="fas fa-copy"></i></button>
-                    <button class="delete-btn" title="Delete tag"><i class="fas fa-trash-alt"></i></button>
+                    <button class="btn submit-btn" title="Submit changes" style="display: none;"><i class="fas fa-check"></i></button>
+                    <a href="https://e621.net/posts?tags=example_tag_1" target="_blank" class="btn link-btn" title="Follow the link"><i class="fas fa-external-link-alt"></i></a>
+                    <button class="btn copy-btn" title="Copy tag"><i class="fas fa-copy"></i></button>
+                    <button class="btn delete-btn" title="Delete tag"><i class="fas fa-trash-alt"></i></button>
+                </div>
+            </li>
+            <li class="folder-item no-select" style="display: none">
+                <svg class="drag-point" width="25" height="25" viewBox="40 0 10 80">
+                    <circle cx="30" cy="20" r="6" fill="#ccc"/>
+                    <circle cx="30" cy="40" r="6" fill="#ccc"/>
+                    <circle cx="30" cy="60" r="6" fill="#ccc"/>
+                    <circle cx="50" cy="20" r="6" fill="#ccc"/>
+                    <circle cx="50" cy="40" r="6" fill="#ccc"/>
+                    <circle cx="50" cy="60" r="6" fill="#ccc"/>
+                </svg>
+                <button class="btn collapse-btn"><i class="fas fa-chevron-down"></i></button>
+                <input type="text" class="tag-name" value="Folder">
+                <div class="tag-actions">
+                    <button class="btn edit-btn" title="Edit folder name"><i class="fas fa-pen"></i></button>
+                    <button class="btn delete-btn" title="Delete folder"><i class="fas fa-trash-alt"></i></button>
+                </div>
+                <div class="confirm-actions hide">
+                    <button class="btn confirm-btn"><i class="fas fa-check"></i></button>
+                    <button class="btn reject-btn"><i class="fas fa-xmark"></i></button>
                 </div>
             </li>
         </ul>
     </main>
 
     <!-- Настройки -->
-    <main id="settings" style="display: none;">
+    <main id="settings-main" style="display: none;">
         <nav style="display: none;">
             <ul>
-                <li>General</li>
-                <li>Appearance</li>
-                <li>Hotkeys</li>
+                <li>расширение</li>
+                <li>сайт</li>
+                <li>арт</li>
             </ul>
         </nav>
         
-        <div id="generalSettings">
-            <label for="a1" class="switch" title="123">togle nothing
-                <input type="checkbox" id="a1">
-                <span class="slider"></span>
-            </label>
-
-            <!-- разделитель между разделами -->
-            <div class="settings-section-separator">
-                <span class="line"></span>
-                <span class="text">title</span>
-                <span class="line"></span>
-            </div>
-            
-            <label for="a2" class="switch" title="123">option 2
-                <input type="checkbox" id="a2">
-                <span class="slider"></span>
-            </label>
+        <div id="general-settings">
         </div>
 
         <div id="appearanceSettings" style="display: none;">
-            <p>Appearance settings coming soon...</p>
         </div>
 
         <div id="hotkeysSettings" style="display: none;">
-            <p>Hotkeys settings coming soon...</p>
         </div>
     </main>
 
     <!-- Скрипт приложения -->
     <script src="static/utils.js"></script>
     <script src="static/script.js"></script>
+    <script src="static/settings.js"></script>
 </body>
 </html>

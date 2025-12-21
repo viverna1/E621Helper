@@ -77,15 +77,40 @@ function addStButton() {
     searchControls.prepend(button);
 }
 
+function applySettings() {
+    const settings = e621Utils.getSettings();
+
+    if (settings["hide_original_tags"]) {
+        tagsContainer.innerHTML = "";
+    }
+}
+
 async function Init() {
     await e621Utils.initData()
-    tags = await e621Utils.getTags()
+    settings = await e621Utils.getSettings()
 
     addStButton();
+    applySettings();
 
-    tags.forEach(tag => {
-        createSidebarTag(tag);
-    });
+    if (settings["tags_in_e621"]) {
+        items = await e621Utils.getItems().sort((a, b) => a.order - b.order);
+
+        items.forEach(item => {
+            if (item.type === "tag")
+                createSidebarTag(e621Utils.getTagById(item.id));
+            else {
+                const space = document.createElement("li");
+                space.className = "space";
+                space.style.height = "10px";
+                tagsContainer.prepend(space);
+            }
+        });
+
+        const firstChild = tagsContainer.children[0];
+        if (firstChild.classList.contains('space')) {
+            firstChild.remove();
+        }
+    }
 }
 
 Init();

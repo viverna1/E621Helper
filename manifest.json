@@ -1,9 +1,9 @@
 {
   "manifest_version": 2,
   "name": "e621 Enhancer",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Расширение для улучшения e621/e926: управление тегами, настройки интерфейса и дополнительные инструменты",
-  "homepage_url": "https://github.com/viverna1",
+  "homepage_url": "https://github.com/viverna1/E621-Enhancer",
   
   "permissions": ["activeTab", "storage"],
   

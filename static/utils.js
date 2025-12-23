@@ -2,6 +2,7 @@
 window.e621Utils = {
 
 appData: {
+    version: "1.1.0",
     internal: {},
     options: {},
     tags: [],
@@ -13,10 +14,19 @@ _isInitialized: false,
 
 // ============= Данные =============
 fetchTagCategory: async function(tagName) {
+    console.log(`fetching tag "${tagName}" category...`);
+
+    if (tagName === '') {
+        console.log("tag empty: none");
+        return "none"
+    }
+
+    if (tagName.includes(":")) {
+        console.log("category: meta");
+        return "meta"
+    }
+    
     try {
-        tagName = tagName.split(':')[0];
-        console.log(`fetching tag "${tagName}" category...`);
-        
         const url = `https://e621.net/tags.json?search[name]=${encodeURIComponent(tagName)}`;
         const response = await fetch(url, {
             headers: {
@@ -59,14 +69,9 @@ fetchTagCategory: async function(tagName) {
 },
 
 loadJsonData: async function() {
-    try {
-        const response = await fetch('data.json');
-        const data = await response.json();
-        this.appData = data;
-    } catch (error) {
-        console.error('Ошибка загрузки данных:', error);
-        return { internal: {}, options: {}, tags: [] };
-    }
+    const response = await fetch('data.json');
+    const data = await response.json();
+    this.appData = data;
 },
 
 loadAllData: async function () {
@@ -84,8 +89,8 @@ saveAllData: function() {
 },
 
 // ============= Items =============
-createItem: function(type, id, order = -1) {
-    if (order === -1) 
+createItem: function(type, id, order = null) {
+    if (!order) 
         order = this.getNextOrderItem();
     return {"type": type, "id": id, "order": order}
 },
@@ -102,17 +107,27 @@ getItemById: function(id) {
     return this.appData.items.find(item => item.id == id);
 },
 
+updateItems: function(newList) {
+    this.appData.items = newList;
+    this.syncOrder();
+    this.saveAllData();
+},
+
 // ============= Теги =============
-addTagToData: async function(tagName, tagCategory = null) {
+addTagToData: function(tagName = '', tagCategory = null) {
     const tagId = this.getNextTagId();
-    this.appData.tags.push({
+    
+    const newTag = {
         "id": tagId, 
         "name": tagName, 
         "category": tagCategory,
         "folderId": null,
         "updatedAt": new Date().toISOString()
-    });
+    }
+
+    this.appData.tags.push(newTag);
     this.appData.items.push(this.createItem("tag", tagId));
+    return newTag;
 },
 
 updateTagInData: async function(tagId, newName) {
@@ -212,6 +227,7 @@ getNextFolderId: function() {
 },
 
 addFolderToData: async function(folderName, folderId = null) {
+    
     if (!folderId)
         folderId = this.getNextFolderId();
 
@@ -320,154 +336,199 @@ getInternal: function() {
     return this.appData.internal;
 },
 
-// Переделать
-sortAndGroupItems: function() {
-    // 1. Сортируем по order (от большего к меньшему или наоборот, в зависимости от нужного порядка)
-    const sorted = [...this.appData.items].sort((a, b) => b.order - a.order);
-    
-    // 2. Создаем массив для результата
-    const result = [];
-    
-    // 3. Собираем папки и их теги
-    const folderMap = new Map(); // id папки -> {папка, теги}
-    
-    // 4. Сначала находим все папки
-    sorted.forEach(item => {
-        if (item.type === 'folder') {
-            folderMap.set(item.id, {
-                folder: item,
-                tags: []
-            });
-        }
-    });
-    
-    // 5. Распределяем теги по папкам
-    sorted.forEach(item => {
-        if (item.type === 'tag') {
-            // Находим папку, в которой этот тег
-            let found = false;
-            
-            for (const [folderId, folderData] of folderMap) {
-                // Проверяем, есть ли этот тег в tagsId папки
-                // Нужна информация о папках из e621Utils.appData.folders
-                const folderInfo = this.appData.folders.find(f => f.id === folderId);
-                if (folderInfo && folderInfo.tagsId.includes(item.id)) {
-                    folderData.tags.push(item);
-                    found = true;
-                    break;
-                }
-            }
-            
-            // Если тег не принадлежит ни одной папке, добавляем в результат отдельно
-            if (!found) {
-                result.push(item);
-            }
-        }
-    });
-    
-    // 6. Собираем результат: папки + их теги
-    folderMap.forEach((folderData, folderId) => {
-        // Добавляем папку
-        result.push(folderData.folder);
-        
-        // Добавляем теги этой папки (можно отсортировать по order)
-        folderData.tags.sort((a, b) => b.order - a.order);
-        result.push(...folderData.tags);
-    });
-    
-    // 7. Обновляем order в соответствии с новой последовательностью
-    result.forEach((item, index) => {
-        item.order = result.length - 1 - index; // или просто index, в зависимости от нумерации
-    });
-    
-    this.appData.items = result;
-    this.saveAllData();
-},
+syncOrder: async function() {
+    try {
+        let originalItems = [...this.getItems()];
+        let newItems = [];
+        let index = 0;
 
-// Неудачная попытка
-sortAndGroupItems2: function() {
-    const items = this.getItems();
-
-    // let newItems = [];
-    let index = 0;
-    
-    items.forEach(item => {
-        if (item.type === "folder") {
-            // Устанавливаем order для папки
-            item.order = index++;
-            
-            // Сразу после папки устанавливаем order для всех её тегов
-            items.forEach(tagItem => {
-                if (tagItem.type === "tag") {
-                    const tag = this.getTagById(tagItem.id);
-                    if (tag.folderId === item.id) {
-                        tagItem.order = index++;
+        originalItems.forEach(item => {
+            if (item.type === "tag") {
+                const tag = this.getTagById(item.id);
+                
+                // Если у тега есть папка - скип
+                if (tag.folderId) return;
+                
+                newItems.push({ type: "tag", id: tag.id, order: index });
+                // console.log(`tag: o:${item.order} | i:${index} => "${tag.name}", fol: ${tag.folderId}, id: ${tag.id}`);
+            } else {
+                const folder = this.getFolderById(item.id)
+                
+                originalItems.forEach(item => {
+                    if (item.type === "tag") {
+                        const tag = this.getTagById(item.id);
+                        
+                        if (folder.tagsId.includes(tag.id)) {
+                            newItems.push({ type: "tag", id: tag.id, order: index });
+                            // console.log(`--- tag: o:${item.order} | i:${index} => "${tag.name}", fol: ${tag.folderId}, id: ${tag.id}`);
+                            index++;
+                        }
                     }
-                }
-            });
-        } else if (item.type === "tag") {
-            const tag = this.getTagById(item.id);
-            // Обрабатываем только теги без папки
-            if (tag.folderId === null) {
-                item.order = index++;
+                });
+                
+                // console.log(`folder: o:${item.order} | i:${index} => "${folder.name}", fol: [${folder.tagsId}]`);
+                newItems.push({ type: "folder", id: folder.id, order: index });
             }
-        }
-    });
-    
-    this.saveAllData();
+            index++;
+        });
+
+        this.appData.items = newItems;
+        await this.saveAllData();
+    } catch (error) {
+        console.error("syncOrder ERROR:", error);
+        return;
+    }
 },
 
-// Неудачная попытка
-insertInOrder: function (itemId, newOrder) {
-    const items = this.appData.items;
+// ============= Экспорт / Импорт =============
+exportAll: function() {
+    // Преобразуем объект в JSON строку с отступами
+    const jsonData = JSON.stringify(e621Utils.appData, null, 2);
+    
+    // Создаем Blob (бинарный объект)
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    
+    // Создаем URL для Blob
+    const url = URL.createObjectURL(blob);
+    
+    // Создаем временную ссылку
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'e621enhancer.json'; // Имя файла
+    
+    // Симулируем клик для скачивания
+    document.body.appendChild(a);
+    a.click();
+    
+    // Очищаем
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+},
 
-    // сортируем по текущему order
-    items.sort((a, b) => a.order - b.order);
-
-    // находим сам item
-    const targetIndex = items.findIndex(i => i.id == itemId);
-    if (targetIndex === -1) return;
-
-    const targetItem = items[targetIndex];
-
-    // собираем блок для перемещения
-    let block = [];
-
-    if (targetItem.type === "folder") {
-        // папка + все её теги
-        block.push(targetItem);
-
-        const folder = this.getFolderById(targetItem.id);
-        if (folder) {
-            folder.tagsId.forEach(tagId => {
-                const tagItem = items.find(i => i.type === "tag" && i.id === tagId);
-                if (tagItem) block.push(tagItem);
-            });
-        }
-    } else {
-        // одиночный тег
-        block.push(targetItem);
+exportTags: function() {
+    const tagsData = {
+        "tags": e621Utils.getTags(),
+        "folders": e621Utils.getFolders(),
+        "items": e621Utils.getItems()
     }
 
-    // удаляем блок из items
-    const blockIds = new Set(block.map(i => `${i.type}:${i.id}`));
-    const rest = items.filter(i => !blockIds.has(`${i.type}:${i.id}`));
-
-    // ограничиваем newOrder
-    if (newOrder < 0) newOrder = 0;
-    if (newOrder > rest.length) newOrder = rest.length;
-
-    // вставляем блок
-    rest.splice(newOrder, 0, ...block);
-
-    // пересчитываем order
-    rest.forEach((item, index) => {
-        item.order = index;
-    });
-
-    this.appData.items = rest;
-    this.saveAllData();
+    // Преобразуем объект в JSON строку с отступами
+    const jsonData = JSON.stringify(tagsData, null, 2);
+    
+    // Создаем Blob (бинарный объект)
+    const blob = new Blob([jsonData], { type: 'application/json' });
+    
+    // Создаем URL для Blob
+    const url = URL.createObjectURL(blob);
+    
+    // Создаем временную ссылку
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'e621enhancer-tags.json'; // Имя файла
+    
+    // Симулируем клик для скачивания
+    document.body.appendChild(a);
+    a.click();
+    
+    // Очищаем
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
 },
+
+importData: async function(jsonString) {
+    try {
+        const importedData = JSON.parse(jsonString);
+
+        await e621Utils.loadAllData();
+        const defaultData = e621Utils.appData;
+        console.log(defaultData);
+        
+        
+        // Заменяем данные: импортированные или дефолтные
+        e621Utils.appData = {
+            version: importedData.version || defaultData.version,
+            internal: importedData.internal || defaultData.internal,
+            options: importedData.options || defaultData.options,
+            tags: importedData.tags || defaultData.tags,
+            folders: importedData.folders || defaultData.folders,
+            items: importedData.items || defaultData.items,
+            recentTags: []
+        };
+        
+        e621Utils.saveAllData();
+        console.log('Import successful');
+        return { success: true };
+        
+    } catch (error) {
+        console.error('Import error:', error);
+        return { success: false, error: error.message };
+    }
+},
+
+importFromFile: function() {
+    return new Promise((resolve, reject) => {
+        // Создаём скрытый input
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = '.json,application/json';
+        input.style.display = 'none';
+        
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (!file) {
+                reject(new Error('No file selected'));
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                const result = e621Utils.importData(e.target.result);
+                document.body.removeChild(input); // Удаляем input
+                resolve(result);
+            };
+            
+            reader.onerror = () => {
+                document.body.removeChild(input);
+                reject(new Error('File reading failed'));
+            };
+            
+            reader.readAsText(file);
+        };
+        
+        // Если пользователь закрыл диалог без выбора
+        input.oncancel = () => {
+            document.body.removeChild(input);
+            reject(new Error('File selection cancelled'));
+        };
+        
+        // Добавляем в DOM и кликаем
+        document.body.appendChild(input);
+        input.click();
+    });
+},
+
+saveFile: function(data) {
+    // Создаем Blob (бинарный объект)
+    const blob = new Blob([data], { type: 'application/txt' });
+    
+    // Создаем URL для Blob
+    const url = URL.createObjectURL(blob);
+    
+    // Создаем временную ссылку
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'tags.txt'; // Имя файла
+    
+    // Симулируем клик для скачивания
+    document.body.appendChild(a);
+    a.click();
+    
+    // Очищаем
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+},
+
 
 initData: async function() {
     await this.loadAllData();
@@ -483,7 +544,7 @@ initData: async function() {
     if (this._isInitialized) return;
     this._isInitialized = true;
 
-    this.sortAndGroupItems();
+    await this.syncOrder();
 
     this.appData.tags.forEach(tag => {
         if (tag.category === null)
@@ -493,28 +554,38 @@ initData: async function() {
 
 }
 
-// Для лёгкой отладки
-window.e621Utils2 = {
-...window.e621Utils,  // Копируем все старые свойства
-// Перезаписываем нужное
+const isDebugMode = typeof browser === 'undefined';
+if (isDebugMode) {
+    // Для лёгкой отладки
+    window.e621Utils2 = {
+    ...window.e621Utils,  // Копируем все старые свойства
+    // Перезаписываем нужное
 
-loadJsonData: async function () {
-    const response = await fetch('data.json');
-    this.appData = await response.json();
-    return this.appData;
-},
+    loadJsonData: async function () {
+        const response = await fetch('data.json');
+        this.appData = await response.json();
+        return this.appData;
+    },
 
-saveAllData: function() {
-    console.log('"Save"');
-},
+    loadAllData: async function () {
+        return await this.appData;
+    },
 
-fetchTagCategory: async function(tagName) {
-    return "general";
-},
+    saveAllData: function() {
+        console.log('"Save"');
+    },
 
-initData: async function() {
-    await this.loadJsonData();
-    this.sortAndGroupItems();
-},
+    fetchTagCategory: async function(tagName) {
+        return "general";
+    },
 
+    initData: async function() {
+        await this.loadJsonData();
+        
+        if (this._isInitialized) return;
+        this._isInitialized = true;
+
+        await this.syncOrder();
+    },
+}
 }

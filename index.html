@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -17,59 +18,63 @@
 </head>
 
 <body>
-    <header>
-        <h1 id="title">Saved tags</h1>
-
-        <div class="header-actions">
-            <!-- кнопка папки -->
-            <button id="add-folder-btn" class="header-btn">
-                <i class="fas fa-folder"></i>
-            </button>
-
-            <!-- кнопка добавить -->
-            <button id="add-tag-btn" class="header-btn">
-                <i class="fas fa-plus"></i>
-            </button>
-
-            <!-- кнопка настроек -->
-            <button id="settings-btn" class="header-btn">
-                <i class="fas fa-cog"></i>
-            </button>
-        </div>
-    </header>
+    <!-- кнопка настроек -->
+    <button id="settings-btn" class="header-btn">
+        <i class="fas fa-cog"></i>
+    </button>
 
     <!-- Мейн -->
     <main id="tags-main">
+        <header id="tags-header">
+            <h1 class="title">Saved tags</h1>
+
+            <div class="header-actions">
+                <!-- кнопка папки -->
+                <button id="add-folder-btn" class="header-btn">
+                    <i class="fas fa-folder"></i>
+                </button>
+
+                <!-- кнопка добавить -->
+                <button id="add-tag-btn" class="header-btn">
+                    <i class="fas fa-plus"></i>
+                </button>
+
+            </div>
+        </header>
+
         <ul id="tags-list">
-            <li class="tag-item" style="display: none">
+            <li class="tag-item color-white" style="display: non">
                 <svg class="drag-point" width="25" height="25" viewBox="40 0 10 80">
-                    <circle cx="30" cy="20" r="6" fill="#ccc"/>
-                    <circle cx="30" cy="40" r="6" fill="#ccc"/>
-                    <circle cx="30" cy="60" r="6" fill="#ccc"/>
-                    <circle cx="50" cy="20" r="6" fill="#ccc"/>
-                    <circle cx="50" cy="40" r="6" fill="#ccc"/>
-                    <circle cx="50" cy="60" r="6" fill="#ccc"/>
+                    <circle cx="30" cy="20" r="6" fill="#ccc" />
+                    <circle cx="30" cy="40" r="6" fill="#ccc" />
+                    <circle cx="30" cy="60" r="6" fill="#ccc" />
+                    <circle cx="50" cy="20" r="6" fill="#ccc" />
+                    <circle cx="50" cy="40" r="6" fill="#ccc" />
+                    <circle cx="50" cy="60" r="6" fill="#ccc" />
                 </svg>
                 <input type="text" class="tag-name" value="example_tag_1">
                 <div class="tag-actions">
-                    <button class="btn submit-btn" title="Submit changes" style="display: none;"><i class="fas fa-check"></i></button>
-                    <a href="https://e621.net/posts?tags=example_tag_1" target="_blank" class="btn link-btn" title="Follow the link"><i class="fas fa-external-link-alt"></i></a>
+                    <button class="btn submit-btn" title="Submit changes" style="display: none"><i
+                            class="fas fa-check"></i></button>
+                    <a href="https://e621.net/posts?tags=example_tag_1" target="_blank" class="btn link-btn"
+                        title="Follow the link"><i class="fas fa-external-link-alt"></i></a>
                     <button class="btn copy-btn" title="Copy tag"><i class="fas fa-copy"></i></button>
                     <button class="btn delete-btn" title="Delete tag"><i class="fas fa-trash-alt"></i></button>
                 </div>
             </li>
-            <li class="folder-item no-select" style="display: none">
+            <li class="folder-item no-select color-white" style="display: non">
                 <svg class="drag-point" width="25" height="25" viewBox="40 0 10 80">
-                    <circle cx="30" cy="20" r="6" fill="#ccc"/>
-                    <circle cx="30" cy="40" r="6" fill="#ccc"/>
-                    <circle cx="30" cy="60" r="6" fill="#ccc"/>
-                    <circle cx="50" cy="20" r="6" fill="#ccc"/>
-                    <circle cx="50" cy="40" r="6" fill="#ccc"/>
-                    <circle cx="50" cy="60" r="6" fill="#ccc"/>
+                    <circle cx="30" cy="20" r="6" fill="#ccc" />
+                    <circle cx="30" cy="40" r="6" fill="#ccc" />
+                    <circle cx="30" cy="60" r="6" fill="#ccc" />
+                    <circle cx="50" cy="20" r="6" fill="#ccc" />
+                    <circle cx="50" cy="40" r="6" fill="#ccc" />
+                    <circle cx="50" cy="60" r="6" fill="#ccc" />
                 </svg>
                 <button class="btn collapse-btn"><i class="fas fa-chevron-down"></i></button>
                 <input type="text" class="tag-name" value="Folder">
                 <div class="tag-actions">
+                    <button class="btn color-btn"><div class="color-white"></div></button>
                     <button class="btn edit-btn" title="Edit folder name"><i class="fas fa-pen"></i></button>
                     <button class="btn delete-btn" title="Delete folder"><i class="fas fa-trash-alt"></i></button>
                 </div>
@@ -82,28 +87,79 @@
     </main>
 
     <!-- Настройки -->
-    <main id="settings-main" style="display: none;">
-        <nav style="display: none;">
+    <main id="settings-main">
+        <header id="settings-header">
+            <h1 class="title">Settings</h1>
+        </header>
+
+        <nav style="display: none">
             <ul>
                 <li>расширение</li>
                 <li>сайт</li>
                 <li>арт</li>
             </ul>
         </nav>
-        
-        <div id="general-settings">
+
+        <div id="templates" style="display: none">
+            <div class="settings-section-separator">
+                <span class="line"></span>
+                <span class="text">title</span>
+                <span class="line"></span>
+            </div>
+
+            <label class="switch setting-item" title="togle">
+                Toggle
+                <input type="checkbox" id="tmp-toggle">
+                <span class="slider"></span>
+            </label>
+             
+            <div class="setting-item" title="button">
+                Button
+                <button class="setting-btn">click</button>
+            </div>
+             
+            <div class="setting-item" title="number">
+                Number
+                <div class="number-control">
+                    <button class="number-btn decrement">-</button>
+                    <input type="number" class="number-input" value="1" min="1" max="100">
+                    <button class="number-btn increment">+</button>
+                </div>
+            </div>
         </div>
 
-        <div id="appearanceSettings" style="display: none;">
+        <div id="general-settings" style="display: non">
         </div>
 
-        <div id="hotkeysSettings" style="display: none;">
+        <div id="appearanceSettings" style="display: none">
+        </div>
+
+        <div id="hotkeysSettings" style="display: none">
         </div>
     </main>
+
+    <section id="error", style="display: none;">
+        <header id="error-header">
+            <h1 class="title">Sorry. Something went wrong</h1>
+        </header>
+        <div id="error-text">
+            <p>Save your tags and reset data</p>
+        </div>
+
+        <div id="error-container">
+            <div id="error-buttons-container">
+                <button id="error-copy" class="setting-btn">Copy</button>
+                <button id="error-file" class="setting-btn">Save file</button>
+            </div>
+            <textarea id="error-textarea" readonly></textarea>
+            <button id="error-reset" class="setting-btn">Reset data</button>
+        </div>
+    </section>
 
     <!-- Скрипт приложения -->
     <script src="static/utils.js"></script>
     <script src="static/script.js"></script>
     <script src="static/settings.js"></script>
 </body>
+
 </html>

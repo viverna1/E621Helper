@@ -1,5 +1,5 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "e621 Enhancer",
   "version": "1.1.0",
   "description": "Расширение для улучшения e621/e926: управление тегами, настройки интерфейса и дополнительные инструменты",
@@ -9,7 +9,7 @@
   
   "icons": { "64": "icons/logo.png" },
   
-  "browser_action": {
+  "action": {
     "default_icon": "icons/logo.png",
     "default_title": "e621 Enhancer",
     "default_popup": "index.html"
@@ -22,10 +22,15 @@
     }
   ],
   
+  "host_permissions": [
+    "*://e621.net/*",
+    "*://e926.net/*"
+  ],
+  
   "browser_specific_settings": {
     "gecko": {
       "id": "e621enhancer@viverna.dev",
-      "strict_min_version": "91.0",
+      "strict_min_version": "109.0",
       "data_collection_permissions": {
         "required": ["none"],
         "optional": []

@@ -1,10 +1,33 @@
 :root {
-    --backgroundСolor: #152f56; /* #222222; */
-    --secondColor: #1f3c67; /* #404040 */
+    --backgroundСolor: #222222; /* #152f56; */
+    --secondColor: #404040; /* #1f3c67 */
     --whiteColor: #e2e2e2;
+    
+    --color-tag-general: #ffee95;
+    --color-tag-artist: #f2ac08;
+    --color-tag-contributor: #c0c0c0;
+    --color-tag-copyright: #d0d;
+    --color-tag-character: #0a0;
+    --color-tag-species: #ed5d1f;
+    --color-tag-invalid: #ff3d3d;
+    --color-tag-meta: #fff;
+    --color-tag-lore: #282;
+    --color-tag-pool: wheat;
+    
+    /* Общая прозрачность */
+    --alpha-tag: 0.05;     /* Для обычных тегов */
+    --alpha-folder: 0.1;   /* Для папок */
+    --alpha-btn: 0.8;      /* Для кнопок цвета */
+  
+    /* Цвета в RGB формате (без альфа!) */
+    --color-white: 255 255 255;
+    --color-red: 255 0 0;
+    --color-blue: 0 0 255;
+    --color-green: 0 255 0;
+    --color-yellow: 255 255 0;
 }
 
-/* Общие стили */
+/* ====== Общие стили ====== */
 * {
     margin: 0;
     padding: 0;
@@ -15,7 +38,7 @@ body {
     font-family: 'Montserrat', sans-serif;
     background-color: var(--backgroundСolor);
     color: var(--whiteColor);
-    
+
     line-height: 1.6;
     padding: 0;
     margin: 0;
@@ -43,7 +66,9 @@ header {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-right: 28px;
 }
+
 .header-btn {
     background: none;
     border: none;
@@ -56,15 +81,22 @@ header {
     border-radius: 50%;
     transition: all 0.2s ease;
 }
+
 .header-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
 
-#title {
+.title {
     font-size: 17px;
     font-weight: 500;
     margin-right: 10px;
     user-select: none;
+}
+
+#settings-btn {
+    position: absolute;
+    top: 3px;
+    right: 8px;
 }
 
 
@@ -77,13 +109,14 @@ main {
     flex-direction: column;
 }
 
-.input-section, .output-section {
+.input-section,
+.output-section {
     position: relative;
     display: flex;
     flex: 0 1 auto;
 }
 
-/* Теги */
+/* ====== Теги ====== */
 .tag-item {
     position: relative;
     display: flex;
@@ -92,8 +125,10 @@ main {
     padding: 6px 12px;
     padding-left: 6px;
     border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgb(var(--current-color, 34,34,34) / var(--alpha-tag));
     transition: background-color 0.2s ease;
 }
+
 .tag-item:hover {
     background-color: rgba(255, 255, 255, 0.02);
 }
@@ -105,10 +140,10 @@ main {
     font-weight: 500;
     color: var(--whiteColor);
     width: 100%;
-    
+
     /* Text handling */
     overflow: hidden;
-    
+
     /* Visual styling */
     background: none;
     border: none;
@@ -120,10 +155,11 @@ main {
     cursor: text;
 }
 
-.tag-actions, .confirm-actions {
+.tag-actions,
+.confirm-actions {
     flex-shrink: 0;
     flex-grow: 0;
-    
+
     width: auto;
     display: flex;
     align-items: center;
@@ -137,10 +173,17 @@ main {
     font-size: 13px;
     margin-left: 4px;
     padding: 5px;
-    width: 30px; /* или min-width */
-    aspect-ratio: 1 / 1; /* соотношение сторон 1:1 */
+    width: 30px;
+    text-align: center;
+    aspect-ratio: 1 / 1;
+    /* соотношение сторон 1:1 */
     border-radius: 50%;
+
+    display: flex;
+    justify-content: center; /* Горизонтальное выравнивание */
+    align-items: center;     /* Вертикальное выравнивание */
 }
+
 .btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
@@ -151,17 +194,56 @@ main {
     align-items: center;
     justify-content: space-between;
     padding: 0px 12px 0px 6px;
-    background-color: rgba(255, 255, 255, 0.1);
+    background-color: rgb(255, 255, 255, 0.1);
+    /* background-color: rgb(var(--current-color, 255, 255, 255) / var(--alpha-folder)); */
     transition: background-color 0.2s ease;
 }
+
 .collapse-btn {
     margin-right: 5px;
 }
+
 .collapse-btn:hover {
     background-color: rgba(255, 255, 255, 0.1);
 }
 
-/* Drag & Drop стили */
+.color-btn div {
+    border: black 2px solid;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    background-color: rgb(var(--current-color, 0 0 0) / var(--alpha-btn));
+}
+
+
+/* Категории тегов */
+.tag-general { color: var(--color-tag-general); }
+.tag-artist { color: var(--color-tag-artist); }
+.tag-contributor { color: var(--color-tag-contributor); }
+.tag-copyright { color: var(--color-tag-copyright); }
+.tag-character { color: var(--color-tag-character); }
+.tag-species { color: var(--color-tag-species); }
+.tag-invalid { color: var(--color-tag-invalid); }
+.tag-meta { color: var(--color-tag-meta); }
+.tag-lore { color: var(--color-tag-lore); }
+.tag-pool { color: var(--color-tag-pool); }
+
+/* Цвета */
+.color-white { --current-color: var(--color-white); }
+.color-red { --current-color: var(--color-red); }
+.color-blue { --current-color: var(--color-blue); }
+.color-green { --current-color: var(--color-green); }
+.color-yellow { --current-color: var(--color-yellow); }
+.color-orange { --current-color: var(--color-orange); }
+.color-purple { --current-color: var(--color-purple); }
+.color-pink { --current-color: var(--color-pink); }
+.color-gray { --current-color: var(--color-gray); }
+
+
+
+
+
+/* ====== Drag & Drop стили ====== */
 .dragging {
     z-index: 100;
 }
@@ -173,7 +255,8 @@ main {
     cursor: grab;
 }
 
-.folder-item:hover .drag-point, .tag-item:hover .drag-point {
+.folder-item:hover .drag-point,
+.tag-item:hover .drag-point {
     transform: translateX(0);
 }
 
@@ -207,6 +290,10 @@ main {
     font-size: 13px;
 }
 
+.setting-space {
+    height: 10px;
+}
+
 
 .setting-item {
     display: flex;
@@ -217,10 +304,12 @@ main {
     user-select: none;
     align-items: center;
 }
+
 .setting-item:hover {
     background-color: rgba(255, 255, 255, 0.05);
 }
-.setting-item > * {
+
+.setting-item>* {
     position: absolute;
     right: 12px;
 }
@@ -241,16 +330,17 @@ main {
     height: 17px;
     background-color: #747474;
     background-color: rgba(255, 255, 255, 0.3);
-    border-radius: 20px; 
+    border-radius: 20px;
     transition: 0.2s;
     cursor: pointer;
 }
+
 .slider:before {
     position: absolute;
     content: "";
     height: 13px;
     width: 13px;
-        
+
     left: 2.5px;
     bottom: 12%;
 
@@ -259,10 +349,11 @@ main {
     transition: 0.2s;
 }
 
-input:checked + .slider {
+input:checked+.slider {
     background-color: #68afe9;
-}  
-input:checked + .slider:before {
+}
+
+input:checked+.slider:before {
     height: 13px;
     transform: translateX(23px);
 }
@@ -278,11 +369,58 @@ input:checked + .slider:before {
     color: var(--whiteColor);
     border: rgba(255, 255, 255, 0.1) 1px solid;
 }
+
 .setting-btn:hover {
     background-color: rgba(255, 255, 255, 0.2);
 }
+
 .setting-btn:active {
     background-color: rgba(255, 255, 255, 0.15);
+}
+
+
+/* число */
+.number-control {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 5px;
+    overflow: hidden;
+    height: 21px;
+}
+
+.number-btn {
+    width: 18px;
+    height: 21px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.05);
+    border: none;
+    color: var(--whiteColor);
+    cursor: pointer;
+}
+.number-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+.number-btn:active {
+    background-color: rgba(255, 255, 255, 0.05);
+}
+
+.number-input {
+    width: 32px;
+    height: 32px;
+    border: none;
+    outline: none;
+    text-align: center;
+    color: var(--whiteColor);
+    font-size: 13px;
+    font-weight: 500;
+    background: rgba(255, 255, 255, 0.05);
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
 }
 
 
@@ -294,12 +432,14 @@ input:checked + .slider:before {
     margin: 10px 0 0 10px;
     user-select: none;
 }
+
 .line {
     flex: 1;
     height: 1px;
     background-color: rgba(255, 255, 255, 0.293);
     margin: 0 10px;
 }
+
 .text {
     white-space: nowrap;
     font-size: 14px;
@@ -307,20 +447,108 @@ input:checked + .slider:before {
     /* Выравниваем текст ближе к левому краю */
     margin-right: auto;
 }
+
 .settings-section-separator .line:first-child {
-    flex: 0 0 20px; /* Короткая линия слева */
+    flex: 0 0 20px;
+    /* Короткая линия слева */
     margin-left: 0;
 }
+
 .settings-section-separator .line:last-child {
-    flex: 1; /* Длинная линия справа */
+    flex: 1;
+    /* Длинная линия справа */
 }
 
 
 
 
 
+/* ====== Стили для секции ошибок ====== */
+#error {
+    display: none;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+}
 
+#error-container {
+    padding: 15px;
+}
 
+#error-copy,
+#error-file {
+    width: calc(50% - 4px);
+    height: 30px;
+    color: var(--whiteColor);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+}
 
+#error-copy {
+    margin-right: 8px;
+}
 
+#error-file {
+    margin-left: 0;
+}
 
+#error-text {
+    color: rgba(255, 255, 255, 0.6);
+    text-align: center;
+}
+
+#error-textarea {
+    width: 100%;
+    min-height: 200px;
+    max-height: 400px;
+    padding: 8px;
+    background-color: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 7px;
+    color: var(--whiteColor);
+    font-family: 'Montserrat', monospace;
+    font-size: 12px;
+    line-height: 1.4;
+    resize: none;
+    overflow-y: auto;
+    user-select: text;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+}
+
+#error-textarea:focus {
+    outline: none;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+#error-reset {
+    width: 100%;
+    height: 35px;
+    border-radius: 7px;
+    background-color: rgba(220, 53, 69, 0.2);
+    color: #ff6b6b;
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    margin-top: 5px;
+}
+
+#error-reset:hover {
+    background-color: rgba(220, 53, 69, 0.3);
+    border-color: rgba(220, 53, 69, 0.4);
+}
+
+#error-reset:active {
+    background-color: rgba(220, 53, 69, 0.25);
+}
+
+/* Контейнер для кнопок над текстовым полем */
+#error-buttons-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    margin-bottom: 12px;
+}

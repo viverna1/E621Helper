@@ -1,42 +1,39 @@
 {
+    "version": "1.1.0",
     "internal": {
-        "background_color": "#222222",
-        "second_color": "#404040"
+        
     },
+
     "options": {
+        "tags_color": true,
+        "original_theme": false,
+        "copy_close": false,
+        "auto_collapse": false,
+
+        "recent_tags": false,
+        "recent_no_duplicates": true,
+        "recent_on_site": true,
+        "recent_count": 5,
+
         "tags_in_e621": true,
-        "hide_original_tags": false
+        "hide_original_tags": false,
+        "hide_e621_tabs": false,
+        "hover_art_increase": true,
+        "max_art_height": true
     },
 
     "tags": [
-        {"id": 1, "name": "order:score", "category": "meta", "folderId": "f1", "updatedAt": "2025-12-18T01:58:51.835Z"},
-        {"id": 2, "name": "score:>200", "category": "meta", "folderId": "f1", "updatedAt": "2025-12-18T01:58:51.835Z"},
-        {"id": 3, "name": "rain_world", "category": "copyright", "folderId": "f2", "updatedAt": "2025-12-18T010:58:51.835Z"},
-        {"id": 4, "name": "anthro", "category": "general", "folderId": null, "updatedAt": "2025-12-18T010:58:51.835Z"},
-        {"id": 5, "name": "protogen", "category": "Species", "folderId": null, "updatedAt": "2025-12-18T010:58:51.835Z"}
+        {"id": 1, "name": "order:score", "category": "meta", "folderId": null, "updatedAt": "2025-12-18T01:58:51.835Z"},
+        {"id": 2, "name": "score:>200", "category": "meta", "folderId": null, "updatedAt": "2025-12-18T01:58:51.835Z"},
+        {"id": 3, "name": "rain_world", "category": "copyright", "folderId": null, "updatedAt": "2025-12-18T10:58:51.835Z"}
     ],
-    "folders": [
-        {
-            "id": "f1",
-            "name": "meta",
-            "collapsed": false,
-            "tagsId": [1, 2]
-        },
-        {
-            "id": "f2",
-            "name": "copyright",
-            "collapsed": true,
-            "tagsId": [3]
-        }
-    ],
+
+    "folders": [],
+
     "items": [
-        {"type": "tag", "id": 5, "order": 6},
-        {"type": "tag", "id": 4, "order": 5},
-        {"type": "folder", "id": "f2", "order": 4},
-        {"type": "tag", "id": 3, "order": 3},
-        {"type": "folder", "id": "f1", "order": 2},
-        {"type": "tag", "id": 2, "order": 0},
-        {"type": "tag", "id": 1, "order": 1}
+        {"type": "tag", "id": 3, "order": 2},
+        {"type": "tag", "id": 2, "order": 1},
+        {"type": "tag", "id": 1, "order": 0}
     ],
 
     "recentTags": []

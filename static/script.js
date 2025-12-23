@@ -1,16 +1,18 @@
 // ============= Глобальные переменные =============
 const tagsContainer = document.getElementById('tags-list');
 const addButton = document.getElementById('add-tag-btn');
+const addTagButton = document.getElementById('add-tag-btn');
 const addFolderButton = document.getElementById('add-folder-btn');
 const main = document.getElementById('tags-main');
 const dotColor = "#999";
 
 // ============= Работа с тегами =============
-function createTagElement(tagName, tagId) {
+function createTagElement(tagData) {
+    const tagColor = e621Utils.getSettings()["tags_color"];
     const tagItem = document.createElement('li');
     tagItem.className = 'tag-item';
-    tagItem.id = "tag-item-" + tagId;
-    tagItem.dataset.tag = tagName;
+    tagItem.id = "tag-item-" + tagData.id;
+    tagItem.dataset.tag = tagData.name;
 
     tagItem.innerHTML = `
         <svg class="drag-point" width="25" height="25" viewBox="40 0 10 80">
@@ -21,12 +23,12 @@ function createTagElement(tagName, tagId) {
             <circle cx="50" cy="40" r="5" fill="${dotColor}"/>
             <circle cx="50" cy="60" r="5" fill="${dotColor}"/>
         </svg>
-        <input type="text" class="tag-name" value="${tagName}">
+        <input type="text" class="tag-name" value="${tagData.name}">
         <div class="tag-actions">
             <button class="btn submit-btn" title="Submit changes" style="display: none;">
                 <i class="fas fa-check"></i>
             </button>
-            <a href="${formatLink(tagName)}" target="_blank" class="btn link-btn" title="Follow the link">
+            <a href="${formatLink(tagData.name)}" target="_blank" class="btn link-btn" title="Follow the link">
                 <i class="fas fa-external-link-alt"></i>
             </a>
             <button class="btn copy-btn" title="Copy Tag">
@@ -38,9 +40,14 @@ function createTagElement(tagName, tagId) {
         </div>
     `;
 
-    setupTagEventHandlers(tagItem, tagId);
+    const input = tagItem.querySelector('.tag-name');
+    if (tagColor) {
+        input.classList.add(`tag-${tagData.category}`);
+    }
+
+    setupTagEventHandlers(tagItem, tagData.id);
     tagsContainer.prepend(tagItem);
-    return tagItem.querySelector('.tag-name');
+    return input;
 }
 
 function setupTagEventHandlers(tagItem, tagId) {
@@ -105,6 +112,12 @@ function setupTagEventHandlers(tagItem, tagId) {
 async function copyTagToClipboard(tagItem) {
     const tagName = tagItem.querySelector('.tag-name').value;
     await navigator.clipboard.writeText(tagName);
+
+    // Закрываем расширение, если это включено
+    settings = e621Utils.getSettings();
+    if (settings["copy_close"]) {
+        setTimeout(window.close, 100);
+    }
     
     const icon = tagItem.querySelector('.copy-btn i');
     icon.className = 'fas fa-check';
@@ -346,6 +359,7 @@ let dragState = {
     wasFolderCollapsed: false,  // Была ли папка свёрнута до перетаскивания
 };
 
+let lastHighlightedFolder = null;
 let dropIndicator = null;
 
 // Создание индикатора места вставки
@@ -397,6 +411,7 @@ function startDrag(e) {
     
     document.addEventListener('mousemove', onDragMove);
     document.addEventListener('mouseup', onDragEnd);
+    onDragMove(e);
 }
 
 // Движение во время перетаскивания
@@ -404,7 +419,7 @@ function onDragMove(e) {
     if (!dragState.draggedItem) return;
     e.preventDefault();
     
-    const newY = e.clientY - dragState.offsetY;
+    const newY = e.clientY - dragState.offsetY + window.pageYOffset;
     dragState.draggedItem.style.top = newY + 'px';
     
     updateDropIndicator(e.clientY);
@@ -412,10 +427,16 @@ function onDragMove(e) {
 
 // Обновление индикатора места вставки
 function updateDropIndicator(mouseY) {
-    const allItems = Array.from(document.querySelectorAll('.tag-item:not(.dragging):not(.hide), .folder-item:not(.dragging)'));
-    
+    const allItems = Array.from(tagsContainer.children).filter(el => 
+        !el.classList.contains('dragging') && 
+        !(el.classList.contains('tag-item') && el.classList.contains('hide'))
+    );
+
     // Убираем все подсветки
-    allItems.forEach(item => item.classList.remove('drag-over'));
+    if (lastHighlightedFolder) {
+        lastHighlightedFolder.classList.remove('drag-over');
+    }
+
     
     if (allItems.length === 0) {
         dropIndicator.style.display = 'none';
@@ -436,15 +457,16 @@ function updateDropIndicator(mouseY) {
     dropIndicator.style.display = 'block';
     
     if (dropPosition.position === 'before' || dropPosition.position === 'before') {
-        dropIndicator.style.top = (rect.top - 1) + 'px';
+        dropIndicator.style.top = (rect.top - 1 + window.pageYOffset) + 'px';
     } else if (dropPosition.position === 'after') {
-        dropIndicator.style.top = (rect.bottom - 1) + 'px';
+        dropIndicator.style.top = (rect.bottom - 1 + window.pageYOffset) + 'px';
     }
 
     // Подсвечиваем папку
     if (dropPosition.folderId) {
         const folder = getFolderElement(dropPosition.folderId);
         folder.classList.add("drag-over");
+        lastHighlightedFolder = folder;
     }
 }
 
@@ -487,17 +509,9 @@ function findDropPosition(allItems, mouseY) {
                     };
                 } else if (!isInTopHalf) {
                     const folderId = getFolderId(item);
-                    return { 
-                        element: item, 
-                        position: isInTopHalf ? 'before' : 'after',
-                        folderId: folderId
-                    };
+                    return { element: item, position: 'after', folderId: folderId };
                 } else {
-                    return { 
-                        element: item, 
-                        position: isInTopHalf ? 'before' : 'after',
-                        folderId: null
-                    };
+                    return { element: item, position: 'before', folderId: null };
                 }
             }
             
@@ -633,56 +647,8 @@ function onDragEnd(e) {
         }
     }
     
-    // Сохраняем порядок
     saveOrder();
-    
     cleanupDrag();
-}
-
-// Сохранение порядка элементов
-function saveOrder() {
-    const allItems = Array.from(document.querySelectorAll('.tag-item, .folder-item'));
-    
-    // Обновляем order для каждого элемента
-    allItems.forEach((element, index) => {
-        if (element.classList.contains('tag-item')) {
-            const tagId = getTagId(element);
-            const item = e621Utils.appData.items.find(i => i.type === 'tag' && i.id === tagId);
-            if (item) {
-                item.order = index;
-            }
-        } else if (element.classList.contains('folder-item')) {
-            const folderId = getFolderId(element);
-            const item = e621Utils.appData.items.find(i => i.type === 'folder' && i.id === folderId);
-            if (item) {
-                item.order = index;
-            }
-        }
-    });
-    
-    // Обновляем tagsId в папках в соответствии с порядком тегов в DOM
-    e621Utils.getFolders().forEach(folder => {
-        const newTagsOrder = [];
-        
-        // Проходим по DOM и собираем теги этой папки в правильном порядке
-        allItems.forEach(element => {
-            if (element.classList.contains('tag-item')) {
-                const tagId = getTagId(element);
-                const tag = e621Utils.getTagById(tagId);
-                
-                if (tag && tag.folderId === folder.id) {
-                    newTagsOrder.push(tagId);
-                }
-            }
-        });
-        
-        // Обновляем порядок тегов в папке
-        folder.tagsId = newTagsOrder;
-    });
-    
-    if (typeof e621Utils.saveAllData === 'function') {
-        e621Utils.saveAllData();
-    }
 }
 
 // Очистка после перетаскивания
@@ -719,10 +685,28 @@ function cleanupDrag() {
     };
 }
 
+async function saveOrder() {
+    const elements = [...tagsContainer.children];
+    let newItemsList = [];
+    let order = 0;
+    
+    for (let el of elements.reverse()) {
+        if (isTag(el)) {
+            newItemsList.push({"type": "tag", "id": getTagId(el), "order": order});
+        } else {
+            newItemsList.push({"type": "folder", "id": getFolderId(el), "order": order});
+        }
+        
+        order++;
+    }
+    
+    e621Utils.updateItems(newItemsList);
+}
+
 // ============= Интерфейс =============
-async function addNewTag() {
-    await e621Utils.addTagToData('');
-    const input = createTagElement('', e621Utils.getNextTagId() - 1);
+function addNewTag() {
+    const tag = e621Utils.addTagToData();
+    const input = createTagElement(tag);
     input.select();
 }
 
@@ -768,21 +752,57 @@ function getFolderElement(folderId) {
 }
 
 // ============= Запуск приложения =============
-async function initializeApp() {
-    // загружаем данные из расширения
-    await e621Utils.initData();
+function showError() {
+    try {
+        showData();
+    } catch (error) { }
+
+    main.style.display = "none";
+    settingsMain.style.display = "none";
+    settingsButton.style.display = "none";
+
+    const errorSection = document.getElementById('error');
+    const resetButton = document.getElementById('error-reset');
+    const errorTextarea = document.getElementById('error-textarea');
+    const errorCopyButton = document.getElementById('error-copy');
+    const errorSaveButton = document.getElementById('error-file');
+
+    errorSection.style.display = "block";
+
+    let tagsString = "";
+
+    const tags = [...e621Utils.getTags()];
+    if (typeof tags[0] === 'string') {
+        tags.forEach(tagName => {
+            tagsString += tagName + "\n";
+        });
+    } else {
+        tags.forEach(tag => {
+            tagsString += tag.name + "\n";
+        });
+
+    }
+
+    errorTextarea.value += tagsString;
+    errorCopyButton.addEventListener('click', () => {
+        navigator.clipboard.writeText(tagsString);
+    });
+    errorSaveButton.addEventListener('click', () => {
+        e621Utils.saveFile(tagsString);
+    });
+    resetButton.addEventListener('click', resetData);
+}
+
+function reloadTags() {
     tagsContainer.innerHTML = ''
 
-    // применяем тему
-    const internal = e621Utils.getInternal();
-    applyTheme(internal.background_color, internal.second_color);
-
-    // создаём элементы с учётом нового формата
     const items = e621Utils.getItems().sort((a, b) => a.order - b.order);
+
     items.forEach(item => {
         if (item.type === "tag") {
             const tag = e621Utils.getTagById(item.id);
-            createTagElement(tag.name.trim(), tag.id);
+            createTagElement(tag);
+
         } else if (item.type === "folder") {
             const folder = e621Utils.getFolderById(item.id);
             createFolderElement(folder.name.trim(), folder.id);
@@ -793,6 +813,20 @@ async function initializeApp() {
         toggleCollapseFolder(folder.id);
         toggleCollapseFolder(folder.id);
     });
+}
+
+async function initializeApp() {
+    // загружаем данные из расширения
+    await e621Utils.initData();    
+    
+    if (!e621Utils.appData["version"]) {
+        setTimeout(() => {
+            showError();
+        }, 20);
+        return;
+    }
+    
+    reloadTags();
 
     addButton.addEventListener('click', addNewTag);
     addFolderButton.addEventListener('click', addNewFolder);

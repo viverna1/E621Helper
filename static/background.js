@@ -3,11 +3,9 @@ const tagsContainer = document.querySelector(".tag-list.all-tag-list");
 const searchControls = document.querySelector(".search-controls");
 
 function createSidebarTag(tagData) {
-    tagCategory = tagData.category;
-    tagName = tagData.name;
-    tagId = tagData.id;
-
-    if (!tagCategory) tagCategory = "general";
+    const tagCategory = tagData.category || "general";
+    const tagName = tagData.name;
+    const tagId = tagData.id;
 
     const newTag = document.createElement("template");
     const currentUrl = window.location.href;
@@ -56,23 +54,27 @@ function createSidebarTag(tagData) {
     tagsContainer.prepend(newTag.content.firstElementChild);
 }
 
+function createSidebarSpace() {
+    const space = document.createElement("li");
+    space.className = "space";
+    space.style.height = "5px";
+    tagsContainer.prepend(space);
+}
+
 function addStButton() {
     const button = document.createElement("button");
+    button.id = "search-savedtags";
+    button.className = "st-button"
     button.innerHTML = `
-        <button id="search-savedtags" class="st-button" title="Saved tags">
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -1 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
-                <line x1="7" y1="7" x2="7.01" y2="7"></line>
-            </svg>
-        </button>
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 -1 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+            <line x1="7" y1="7" x2="7.01" y2="7"></line>
+        </svg>
     `
 
     button.addEventListener("click", () => {
-        const tagName = prompt("Enter tag name:");
-        if (tagName) {
-            createSidebarTag(tagName);
-        }
+        alert("Work in progress!")
     });
     searchControls.prepend(button);
 }
@@ -85,24 +87,109 @@ function applySettings() {
     }
 }
 
+function applyStyles(settings) {
+    const style = document.createElement('style');
+    style.id = 'e621-enhancer-dynamic-styles';
+    let styles = "";
+    
+    // 1. Скрытие вкладок e621
+    if (settings["hide_e621_tabs"]) {
+        styles += `
+            /* ====== Скрытие вкладок навигации ====== */
+            /* Main navigation tabs */
+            #nav-artists,
+            #nav-tags,
+            #nav-blips,
+            #nav-comments,
+            #nav-forum,
+            #nav-wiki,
+            #nav-discord,
+            #nav-subscribestar {
+                display: none !important;
+            }
+            
+            /* Posts sub-navigation */
+            #subnav-help,
+            #subnav-popular,
+            #subnav-upload,
+            #subnav-listing,
+            .tag-list-wiki {
+                display: none !important;
+            }
+            
+            /* Adjust layout after hiding elements */
+            #main-nav ul,
+            #subnav-menu ul {
+                justify-content: center !important;
+            }
+        `;
+    }
+    
+    // 2. Увеличение артов при наведении
+    if (settings["hover_art_increase"]) {
+        styles += `
+            /* ====== Эффект увеличения артов ====== */
+            .posts-container * {
+                overflow: visible !important;
+            }
+            
+            article.thumbnail:hover img {
+                position: absolute !important;
+                left: 50% !important;
+                top: 50% !important;
+                width: auto !important;
+                height: auto !important;
+                transform: translate(-50%, -50%) scale(1.15) !important;
+                z-index: 1000 !important;
+            }
+            
+            /* Container for positioning */
+            article.thumbnail {
+                position: relative !important;
+            }
+            
+            /* Prevent layout shift */
+            .posts-container {
+                contain: layout style paint !important;
+            }
+        `;
+    }
+    
+    // 3. Ограничение максимальной высоты арта
+    if (settings["max_art_height"]) {
+        styles += `
+            /* ====== Ограничение высоты арта ====== */
+            .fit-window {
+                max-height: calc(100vh - 150px) !important;
+            }
+        `;
+    }
+    
+    style.textContent = styles;
+    document.head.appendChild(style);
+    
+    console.log('e621 Enhancer: styles applied');
+}
+
 async function Init() {
     await e621Utils.initData()
-    settings = await e621Utils.getSettings()
+    settings = e621Utils.getSettings()
 
-    addStButton();
+    // addStButton();
     applySettings();
+    applyStyles(settings);
+
+    if (!settings["hide_original_tags"])
+        createSidebarSpace();
 
     if (settings["tags_in_e621"]) {
-        items = await e621Utils.getItems().sort((a, b) => a.order - b.order);
+        items = e621Utils.getItems().sort((a, b) => a.order - b.order);
 
         items.forEach(item => {
             if (item.type === "tag")
                 createSidebarTag(e621Utils.getTagById(item.id));
             else {
-                const space = document.createElement("li");
-                space.className = "space";
-                space.style.height = "10px";
-                tagsContainer.prepend(space);
+                createSidebarSpace();
             }
         });
 

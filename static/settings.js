@@ -260,7 +260,7 @@ function setupSettingsUI() {
     }
     
     createSeparator("visual");
-    createToggle("Enable e621 default theme", "original_theme", null, null, updateTheme);
+    createToggle("Enable e621 theme", "original_theme", null, null, updateTheme);
     createToggle("Tags color", "tags_color", null, null, reloadTags);
 
     createSeparator("extension");  // Было "exteition" (орфографическая ошибка)
